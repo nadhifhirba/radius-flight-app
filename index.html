@@ -10,6 +10,13 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
 
+    <!-- PWA & Mobile Optimization -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <!-- SEO & Social Sharing -->
     <meta name="description"
         content="Why guess where to go? Tell Radius your budget, and we'll show you the world. Reverse flight search for the modern traveler.">
@@ -278,16 +285,7 @@
                 <h3 class="text-3xl md:text-4xl tracking-tight mb-8 font-light">
                     The world is closer than you think.
                 </h3>
-                <div class="flex gap-4">
-                    <a href="#"
-                        class="border border-white/20 rounded-full px-6 py-3 hover:bg-white hover:text-slate-900 transition-colors text-sm font-medium">
-                        iOS App
-                    </a>
-                    <a href="#"
-                        class="border border-white/20 rounded-full px-6 py-3 hover:bg-white hover:text-slate-900 transition-colors text-sm font-medium">
-                        Android App
-                    </a>
-                </div>
+
             </div>
             <div class="flex gap-16 md:gap-32 text-lg font-medium leading-loose text-slate-400">
                 <ul class="space-y-1">
@@ -332,6 +330,15 @@
     </footer>
 
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered!'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 </body>
 
 </html>

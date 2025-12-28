@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors()); // Note: For production, restrict this to your specific domain (e.g., radius-travel.netlify.app)
 app.use(express.json());
 app.use(express.static('.')); // Serve generic static files (index.html, styles.css)
 

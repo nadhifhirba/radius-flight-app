@@ -36,6 +36,15 @@ const AIRPORT_DB = {
 };
 
 // --- 2. Utils & View Logic ---
+
+// Utility: Sanitize text for innerHTML safety
+const sanitize = (str) => {
+    if (!str) return "";
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+};
+
 const formatCurrency = (val) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumSignificantDigits: 3 }).format(val);
 };
@@ -45,7 +54,8 @@ const showToast = (message, type = 'success') => {
     const toast = document.createElement('div');
     const color = type === 'success' ? 'bg-emerald-500' : 'bg-slate-800';
     toast.className = `${color} text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium toast pointer-events-auto flex items-center gap-2`;
-    toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'bell'}" class="w-4 h-4"></i> ${message}`;
+    // Toast messages are static in this app, but sanitizing is good practice
+    toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'bell'}" class="w-4 h-4"></i> ${sanitize(message)}`;
     container.appendChild(toast);
     lucide.createIcons();
     setTimeout(() => {
@@ -139,11 +149,6 @@ async function handleSearch(skipGridAnimation = false) {
     let isLive = false;
 
     try {
-        // Attempt fetch from local node server
-        // Convert budget to somewhat comparable currency (approx) for API filter if needed, 
-        // but Amadeus Inspiration search takes 'maxPrice'.
-        // Origin MUST be a valid IATA code (CGK, DPS, SUB).
-
         console.log(`Fetching from API: origin=${originCode}&maxPrice=${budget}`);
         const response = await fetch(`/api/search?origin=${originCode}&maxPrice=${budget}`);
         if (response.ok) {
@@ -159,10 +164,6 @@ async function handleSearch(skipGridAnimation = false) {
                     coords: [0, 0] // Map wont work well for unknown
                 };
 
-                // Amadeus Price is usually one-way or roundtrip depending on query, 
-                // Flight Inspiration is typically One-Way or Roundtrip based on API defaults.
-                // It actually returns the 'price' object.
-                // We'll treat 'price.total' as the base cost.
                 const cost = parseFloat(flight.price.total);
 
                 return {
@@ -171,14 +172,14 @@ async function handleSearch(skipGridAnimation = false) {
                     airport: destCode,
                     country: meta.country,
                     img: meta.img,
-                    price_one: cost, // Simplification
-                    price_round: cost * 1.8, // Estimate
-                    airline: "Partner Airline", // API doesn't always give airline in this endpoint easily
-                    stops: 0, // Assumption/Simplification for 'Inspiration'
+                    price_one: cost,
+                    price_round: cost * 1.8,
+                    airline: "Partner Airline",
+                    stops: 0,
                     coords: meta.coords,
-                    cheapestMonth: "Soon", // API returns departureDate
-                    historicalAvg: cost * 1.2, // Mock comp
-                    hotelPrice: cost * 0.5, // Mock est
+                    cheapestMonth: "Soon",
+                    historicalAvg: cost * 1.2,
+                    hotelPrice: cost * 0.5,
                     departureDate: flight.departureDate
                 };
             });
@@ -190,20 +191,16 @@ async function handleSearch(skipGridAnimation = false) {
     } catch (err) {
         console.warn("API Fetch Failed, falling back to mock data.", err);
         showToast("Live/Local Server unavailable. Using Mock Data.", "info");
-        // Fallback to MOCK_DATA
         results = MOCK_DATA;
     }
 
-    // --- FILTERING (Frontend refinement) ---
     const filtered = results.filter(f => {
         const cost = tripType === 'round' ? f.price_round : f.price_one;
-        // API already filtered by budget, but double check for Mock fallback
-        const matchesBudget = cost <= budget * 1.1; // 10% buffer
+        const matchesBudget = cost <= budget * 1.1;
         const matchesGeo = geoScope === 'domestic' ? f.country === 'Indonesia' : true;
         return matchesBudget && matchesGeo;
     });
 
-    // Render Data
     renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive);
 }
 
@@ -217,7 +214,6 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         markers = [];
 
         filtered.forEach(f => {
-            // Skip 0,0 coords
             if (f.coords[0] === 0) return;
 
             const cost = tripType === 'round' ? f.price_round : f.price_one;
@@ -232,9 +228,9 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
 
             circle.bindPopup(`
                 <div class="p-3">
-                    <img src="${f.img}" class="w-full h-24 object-cover rounded-lg mb-2">
-                    <h4 class="font-bold text-slate-900">${f.city}</h4>
-                    <p class="text-xs text-slate-500 mb-2">${f.airport}</p>
+                    <img src="${f.img}" class="w-full h-24 object-cover rounded-lg mb-2" loading="lazy">
+                    <h4 class="font-bold text-slate-900">${sanitize(f.city)}</h4>
+                    <p class="text-xs text-slate-500 mb-2">${sanitize(f.airport)}</p>
                     <p class="text-sm font-semibold text-sky-600">${formatCurrency(cost)}</p>
                 </div>
             `);
@@ -267,7 +263,6 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         const cost = tripType === 'round' ? f.price_round : f.price_one;
         const ratio = cost / f.historicalAvg;
 
-        // Dynamic Badge
         let dealLabel = "Good Deal";
         let dealClass = "text-slate-500";
         let barColor = "bg-slate-300";
@@ -276,9 +271,6 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         if (ratio < 0.8) { dealLabel = "Great Value"; dealClass = "text-emerald-600"; barColor = "bg-emerald-500"; barWidth = "90%"; }
         else if (ratio > 1.1) { dealLabel = "Standard"; dealClass = "text-orange-500"; barColor = "bg-orange-500"; barWidth = "30%"; }
 
-        // Google Flights Deep Link
-        // https://www.google.com/travel/flights?q=Flights%20to%20DPS%20from%20CGK%20on%202024-05-20
-        // If Api gave date, use it.
         const dateStr = f.departureDate ? `on ${f.departureDate}` : '';
         const deepLink = `https://www.google.com/travel/flights?q=Flights to ${f.airport} from ${originCode} ${dateStr}`;
 
@@ -288,15 +280,15 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
 
         card.innerHTML = `
             <div class="relative h-48 overflow-hidden shrink-0">
-                <img src="${f.img}" alt="${f.city}" loading="lazy" class="card-image w-full h-full object-cover transition-transform duration-700">
+                <img src="${f.img}" alt="${sanitize(f.city)}" loading="lazy" class="card-image w-full h-full object-cover transition-transform duration-700">
                 <div class="absolute top-4 left-4">
                      <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Direct</span>
                 </div>
             </div>
             <div class="p-6 flex flex-col gap-4 flex-1">
                 <div>
-                    <h3 class="text-2xl font-normal tracking-tight text-slate-900">${f.city}</h3>
-                    <p class="text-slate-500 text-sm">${f.country} • ${f.airport}</p>
+                    <h3 class="text-2xl font-normal tracking-tight text-slate-900">${sanitize(f.city)}</h3>
+                    <p class="text-slate-500 text-sm">${sanitize(f.country)} • ${sanitize(f.airport)}</p>
                     <div class="flex items-center gap-2 mt-2">
                          <span class="text-[10px] font-bold uppercase tracking-wider ${dealClass}">${dealLabel}</span>
                          <div class="deal-meter-bar flex-1"><div class="deal-meter-fill ${barColor}" style="width: ${barWidth}"></div></div>
@@ -305,7 +297,7 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
                 <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                     <div>
                         <span class="block text-xl font-semibold tracking-tight text-slate-900">${formatCurrency(cost)}</span>
-                        <span class="text-xs text-slate-400 font-medium">${f.departureDate ? f.departureDate : (tripType === 'one' ? 'One Way' : 'Round Trip')}</span>
+                        <span class="text-xs text-slate-400 font-medium">${sanitize(f.departureDate ? f.departureDate : (tripType === 'one' ? 'One Way' : 'Round Trip'))}</span>
                     </div>
                     <a href="${deepLink}" target="_blank" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors">Book</a>
                 </div>
@@ -319,7 +311,6 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
 document.addEventListener("DOMContentLoaded", function () {
     lucide.createIcons();
 
-    // Word Reveal Setup (Same as before)
     const revealElements = document.querySelectorAll('.reveal-text');
     revealElements.forEach(element => {
         if (element.tagName === 'SELECT' || element.tagName === 'BUTTON') return;
