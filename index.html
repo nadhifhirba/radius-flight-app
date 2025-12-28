@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radius — Flight Discovery</title>
+
+    <!-- Favicon (SVG) -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+
+    <!-- SEO & Social Sharing -->
+    <meta name="description"
+        content="Why guess where to go? Tell Radius your budget, and we'll show you the world. Reverse flight search for the modern traveler.">
+    <meta property="og:title" content="Radius — Flight Discovery">
+    <meta property="og:description" content="Don't ask where. Ask how much. Discover flights within your budget.">
+    <meta property="og:image"
+        content="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop">
+    <meta property="og:url" content="https://radius-travel.netlify.app">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="antialiased selection:bg-[#0EA5E9] selection:text-white overflow-x-hidden relative">
+    <!-- Grain Overlay (Global) -->
+    <div class="fixed inset-0 pointer-events-none grain-overlay z-0"></div>
+
+    <!-- Full Screen Menu Overlay -->
+    <div id="fullscreen-menu"
+        class="fixed inset-0 z-50 flex flex-col justify-between bg-white text-slate-900 menu-closed transition-transform duration-[800ms] ease-[cubic-bezier(0.76,0,0.24,1)] overflow-hidden">
+        <div
+            class="relative z-10 w-full px-6 py-6 md:px-12 md:py-8 flex justify-between items-center text-lg font-medium tracking-tight">
+            <div class="tracking-tighter font-semibold">radius.</div>
+            <button onclick="toggleMenu()" class="cursor-pointer hover:text-sky-500 transition-colors">
+                Close
+            </button>
+        </div>
+        <div class="relative z-10 flex-1 flex flex-col justify-center items-center gap-2 md:gap-6">
+            <a href="#" class="group relative overflow-hidden">
+                <span
+                    class="block text-5xl md:text-7xl lg:text-8xl tracking-tighter font-light hover:text-sky-500 transition-colors duration-300">
+                    Search
+                </span>
+            </a>
+            <a href="#" class="group relative overflow-hidden">
+                <span
+                    class="block text-5xl md:text-7xl lg:text-8xl tracking-tighter font-light hover:text-sky-500 transition-colors duration-300">
+                    About
+                </span>
+            </a>
+            <a href="#" class="group relative overflow-hidden">
+                <span
+                    class="block text-5xl md:text-7xl lg:text-8xl tracking-tighter font-light hover:text-sky-500 transition-colors duration-300">
+                    Account
+                </span>
+            </a>
+        </div>
+        <div
+            class="relative z-10 w-full px-6 py-6 md:px-12 md:pb-12 flex flex-col md:flex-row justify-between items-end text-sm md:text-base text-slate-400">
+            <div class="flex gap-4 md:gap-8 mb-4 md:mb-0">
+                <a href="#" class="hover:text-slate-900 transition-colors">X</a>
+                <a href="https://www.instagram.com/nadhifhirba/" target="_blank"
+                    class="hover:text-slate-900 transition-colors">
+                    Instagram
+                </a>
+            </div>
+            <div>
+                <p>Jakarta — Indonesia</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Nav -->
+    <nav
+        class="fixed top-0 left-0 w-full px-6 py-6 md:px-12 md:py-8 flex justify-between items-center z-40 mix-blend-multiply pointer-events-none">
+        <div class="text-xl md:text-2xl font-semibold tracking-tighter pointer-events-auto reveal-text">
+            radius.
+        </div>
+        <button onclick="toggleMenu()"
+            class="text-lg font-medium pointer-events-auto hover:opacity-60 transition-opacity reveal-text">
+            Menu
+        </button>
+    </nav>
+
+    <!-- Hero / Search Section -->
+    <header
+        class="relative w-full min-h-screen flex flex-col justify-center items-start pt-32 pb-20 px-6 md:px-12 max-w-[1800px] mx-auto z-10">
+        <!-- Animated Orb Background -->
+        <div
+            class="absolute top-0 right-0 w-[500px] h-[500px] orb-gradient opacity-60 translate-x-1/3 -translate-y-1/4 animate-pulse duration-[4s]">
+        </div>
+
+        <!-- Main Title -->
+        <div class="mb-24 md:mb-32 relative z-10">
+            <h1 class="text-[13vw] leading-[0.85] tracking-tighter font-light text-slate-900 select-none">
+                <div class="reveal-text">Don't ask where.</div>
+                <div class="reveal-text text-slate-400">Ask how much.</div>
+            </h1>
+        </div>
+
+        <!-- Search Logic (Mad Libs) -->
+        <div class="w-full max-w-5xl relative z-20">
+            <div class="text-3xl md:text-5xl lg:text-6xl font-light leading-snug tracking-tight text-slate-900">
+                <p class="reveal-text inline">I am flying from</p>
+                <div class="reveal-text inline-block relative">
+                    <select id="origin" class="mad-lib-select font-normal">
+                        <option value="Jakarta">Jakarta (All)</option>
+                        <option value="Bali">Bali (DPS)</option>
+                        <option value="Surabaya">Surabaya (SUB)</option>
+                    </select>
+                </div>
+                <p class="reveal-text inline">with</p>
+                <div class="reveal-text inline-block relative">
+                    <select id="budget" class="mad-lib-select font-normal">
+                        <option value="1000000">Rp 1.000.000</option>
+                        <option value="2000000" selected="">Rp 2.000.000</option>
+                        <option value="3000000">Rp 3.000.000</option>
+                        <option value="5000000">Rp 5.000.000</option>
+                        <option value="10000000">Rp 10.000.000</option>
+                    </select>
+                </div>
+                <p class="reveal-text inline">for a</p>
+                <div class="reveal-text inline-block relative">
+                    <select id="tripType" class="mad-lib-select font-normal">
+                        <option value="round" selected="">Round Trip</option>
+                        <option value="one">One Way</option>
+                    </select>
+                </div>
+                <p class="reveal-text inline">trip within</p>
+                <div class="reveal-text inline-block relative">
+                    <select id="geoScope" class="mad-lib-select font-normal">
+                        <option value="anywhere" selected="">the World</option>
+                        <option value="domestic">Indonesia</option>
+                    </select>
+                </div>
+                <p class="reveal-text inline">during</p>
+                <div class="reveal-text inline-block relative">
+                    <select id="datePref" class="mad-lib-select font-normal">
+                        <option value="any" selected="">Any Weekend</option>
+                        <option value="january">January</option>
+                        <option value="february">February</option>
+                        <option value="march">March</option>
+                        <option value="april">April</option>
+                        <option value="may">May</option>
+                        <option value="june">June</option>
+                        <option value="july">July</option>
+                        <option value="august">August</option>
+                        <option value="september">September</option>
+                        <option value="october">October</option>
+                        <option value="november">November</option>
+                        <option value="december">December</option>
+                    </select>
+                </div>
+                <p class="reveal-text inline">.</p>
+            </div>
+
+            <div class="mt-12 reveal-text flex items-center gap-4">
+                <button onclick="handleSearch()"
+                    class="group relative overflow-hidden rounded-full bg-slate-900 text-white px-10 py-5 text-lg font-medium transition-transform active:scale-95 hover:bg-sky-500 duration-500">
+                    <span class="relative z-10 flex items-center gap-2">
+                        See where I can go
+                        <i data-lucide="plane" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                </button>
+                <button onclick="togglePriceAlert()"
+                    class="p-5 rounded-full border border-slate-200 text-slate-400 hover:text-sky-500 hover:border-sky-500 transition-all active:scale-95 group"
+                    title="Set Price Alert">
+                    <i data-lucide="bell" class="w-6 h-6 group-hover:shake"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Container -->
+    <div id="toast-container"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Results Section -->
+    <section id="results-section" class="px-6 md:px-12 pb-32 max-w-[1800px] mx-auto min-h-[50vh]">
+        <div class="flex justify-between items-end mb-12 border-b border-slate-200 pb-4">
+            <span id="result-count" class="text-lg md:text-xl text-slate-500 font-light reveal-text">
+                Ready for takeoff?
+            </span>
+            <div class="flex items-center gap-4">
+                <div class="flex bg-slate-100 rounded-lg p-1 gap-1">
+                    <button id="view-list"
+                        class="px-3 py-1 text-sm font-medium rounded-md bg-white shadow-sm text-slate-900 transition-all"
+                        onclick="switchView('list')">List</button>
+                    <button id="view-map"
+                        class="px-3 py-1 text-sm font-medium rounded-md text-slate-500 hover:text-slate-900 transition-all"
+                        onclick="switchView('map')">Map</button>
+                </div>
+                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full hidden text-sm font-medium"
+                    id="active-filter">
+                    <span id="budget-display"></span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Map Container (Hidden by default) -->
+        <div id="map-container"
+            class="w-full h-[600px] rounded-2xl overflow-hidden shadow-sm border border-slate-200 hidden mb-12 relative z-10">
+            <!-- Custom Legend -->
+            <div
+                class="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-sm border border-slate-200 z-[500] text-sm">
+                <div class="mb-3 text-slate-400 text-[10px] uppercase tracking-wider font-semibold">One-Way Cost</div>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-[#10b981] shadow-sm"></span>
+                        <span class="text-slate-700 font-medium">&lt; Rp 500k</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-[#f59e0b] shadow-sm"></span>
+                        <span class="text-slate-700 font-medium">&lt; Rp 1 Mio</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 rounded-full bg-[#ef4444] shadow-sm"></span>
+                        <span class="text-slate-700 font-medium">&gt; Rp 1 Mio</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
+            <!-- Content injected via JS -->
+            <!-- Initial State / Placeholder -->
+            <div class="col-span-full py-20 text-center text-slate-400 font-light text-xl">
+                Adjust your budget above to reveal destinations.
+            </div>
+        </div>
+    </section>
+
+    <!-- Zero State Template (Hidden) -->
+    <template id="zero-state-template">
+        <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 text-slate-400">
+                <i data-lucide="cloud-off" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-3xl md:text-5xl font-light tracking-tight mb-4">
+                Wings are expensive.
+            </h3>
+            <p class="text-xl text-slate-500 mb-8 max-w-lg">
+                We couldn't find flights within this budget. But wheels are cheap—how
+                about a train?
+            </p>
+            <div
+                class="w-full max-w-md bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 hover:shadow-lg transition-shadow cursor-pointer group">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600">
+                    <i data-lucide="train-front" class="w-6 h-6"></i>
+                </div>
+                <div class="text-left flex-1">
+                    <div class="text-sm text-slate-500 font-medium">Alternative</div>
+                    <div class="text-lg font-semibold tracking-tight group-hover:text-orange-600 transition-colors">
+                        Jakarta to Bandung
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold">Rp 150k</div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white pt-24 px-6 md:px-12 pb-6 relative overflow-hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start mb-32 max-w-[1800px] mx-auto">
+            <div class="mb-12 md:mb-0 max-w-md">
+                <h3 class="text-3xl md:text-4xl tracking-tight mb-8 font-light">
+                    The world is closer than you think.
+                </h3>
+                <div class="flex gap-4">
+                    <a href="#"
+                        class="border border-white/20 rounded-full px-6 py-3 hover:bg-white hover:text-slate-900 transition-colors text-sm font-medium">
+                        iOS App
+                    </a>
+                    <a href="#"
+                        class="border border-white/20 rounded-full px-6 py-3 hover:bg-white hover:text-slate-900 transition-colors text-sm font-medium">
+                        Android App
+                    </a>
+                </div>
+            </div>
+            <div class="flex gap-16 md:gap-32 text-lg font-medium leading-loose text-slate-400">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="hover:text-white transition-colors">Home</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:text-white transition-colors">Flights</a>
+                    </li>
+                </ul>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="https://www.instagram.com/nadhifhirba/" target="_blank"
+                            class="hover:text-white transition-colors">
+                            Instagram ↗
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.instagram.com/nadhifhirba/" target="_blank"
+                            class="hover:text-white transition-colors">
+                            Twitter ↗
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div
+            class="flex flex-col md:flex-row justify-between items-end text-sm text-slate-500 mb-6 max-w-[1800px] mx-auto">
+            <div class="mb-4 md:mb-0">
+                <p>Powered by Skyscanner API.</p>
+            </div>
+            <div class="flex gap-8">
+                <span>©2024 Radius Inc.</span>
+                <span class="opacity-40">by NHADesign</span>
+            </div>
+        </div>
+        <div class="w-full flex justify-center items-end opacity-20">
+            <h1 class="text-[20vw] leading-[0.7] tracking-tighter font-semibold select-none">
+                radius.
+            </h1>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

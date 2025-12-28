@@ -1,0 +1,236 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F8FAFC;
+    /* Cloud White */
+    color: #0f172a;
+    /* Slate 900 */
+}
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Blue/Sky Orb Gradient */
+.orb-gradient {
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.8) 0%, rgba(56, 189, 248, 0.4) 40%, rgba(248, 250, 252, 0) 70%);
+    filter: blur(80px);
+    transform: translateZ(0);
+    /* Hardware Acceleration */
+}
+
+/* Grain Overlay */
+.grain-overlay::before {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E");
+    animation: grain 8s steps(10) infinite;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes grain {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    10% {
+        transform: translate(-5%, -10%);
+    }
+
+    20% {
+        transform: translate(-15%, 5%);
+    }
+
+    30% {
+        transform: translate(7%, -25%);
+    }
+
+    40% {
+        transform: translate(-5%, 25%);
+    }
+
+    50% {
+        transform: translate(-15%, 10%);
+    }
+
+    60% {
+        transform: translate(15%, 0%);
+    }
+
+    70% {
+        transform: translate(0%, 15%);
+    }
+
+    80% {
+        transform: translate(3%, 35%);
+    }
+
+    90% {
+        transform: translate(-10%, 10%);
+    }
+}
+
+/* Text Reveal Animation */
+.word-wrapper {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    margin-bottom: -0.2em;
+    padding-bottom: 0.2em;
+}
+
+.word-inner {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.reveal-active.word-inner {
+    transform: translateY(0);
+}
+
+/* Custom Input Reset for Mad Libs */
+.mad-lib-select {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #e2e8f0;
+    color: #0EA5E9;
+    /* Sky Blue */
+    cursor: pointer;
+    padding: 0 0.5rem;
+    transition: border-color 0.3s ease, color 0.3s ease;
+    text-align: center;
+}
+
+.mad-lib-select:hover {
+    border-color: #0EA5E9;
+}
+
+.mad-lib-select:focus {
+    outline: none;
+    border-color: #0f172a;
+    color: #0f172a;
+}
+
+/* Card Hover Effect */
+.flight-card:hover .card-image {
+    transform: scale(1.05);
+}
+
+/* Loading Skeleton Animation */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Mobile Menu */
+.menu-open {
+    transform: translateY(0%);
+}
+
+.menu-closed {
+    transform: translateY(-100%);
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Leaflet Customization */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    overflow: hidden;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    width: 240px !important;
+}
+
+.leaflet-container {
+    font-family: 'Inter', sans-serif;
+}
+
+/* New Utilities for Improvements */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(10deg);
+    }
+}
+
+.group:hover .group-hover\:shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.toast {
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Deal Meter Styles */
+.deal-meter-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    overflow: hidden;
+    position: relative;
+}
+
+.deal-meter-fill {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
