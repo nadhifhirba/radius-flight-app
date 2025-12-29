@@ -4,7 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radius — Flight Discovery</title>
+    <title>Radius | Discover where your budget can take you</title>
+    <meta name="description"
+        content="Radius helps you find the best flights within your budget. Explore destinations by continent or worldwide and discover amazing deals.">
+    <meta name="keywords" content="flights, travel, budget travel, flight discovery, Radius travel app">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://radius-discovery.netlify.app/">
+    <meta property="og:title" content="Radius | Budget Flight Discovery">
+    <meta property="og:description"
+        content="Discover where your budget can take you. Simple, beautiful flight exploration.">
+    <meta property="og:image"
+        content="https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=1200&q=80">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Radius | Budget Flight Discovery">
+    <meta property="twitter:description"
+        content="Discover where your budget can take you. Simple, beautiful flight exploration.">
 
     <!-- Favicon (SVG) -->
     <link rel="icon"
@@ -18,14 +36,8 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
 
     <!-- SEO & Social Sharing -->
-    <meta name="description"
-        content="Why guess where to go? Tell Radius your budget, and we'll show you the world. Reverse flight search for the modern traveler.">
-    <meta property="og:title" content="Radius — Flight Discovery">
-    <meta property="og:description" content="Don't ask where. Ask how much. Discover flights within your budget.">
-    <meta property="og:image"
-        content="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=1200&auto=format&fit=crop">
-    <meta property="og:url" content="https://radius-travel.netlify.app">
-    <meta name="twitter:card" content="summary_large_image">
+
+
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -100,8 +112,8 @@
             radius.
         </div>
         <div class="flex items-center gap-4 reveal-text pointer-events-auto">
-            <button onclick="toggleDarkMode()" class="theme-toggle hover:scale-110 transition-transform"
-                title="Toggle Night Flight">
+            <button onclick="toggleDarkMode()" class="theme-toggle hover:scale-110 active:scale-95 transition-transform"
+                aria-label="Toggle dark mode">
                 <i data-lucide="moon" id="theme-icon-nav" class="w-5 h-5"></i>
             </button>
             <button onclick="toggleMenu()" class="text-lg font-medium hover:opacity-60 transition-opacity">
@@ -183,12 +195,11 @@
             </div>
 
             <div class="mt-12 reveal-text flex items-center gap-4">
-                <button onclick="handleSearch()"
-                    class="group relative overflow-hidden rounded-full bg-slate-900 text-white px-10 py-5 text-lg font-medium transition-transform active:scale-95 hover:bg-sky-500 duration-500">
-                    <span class="relative z-10 flex items-center gap-2">
-                        See where I can go
-                        <i data-lucide="plane" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
-                    </span>
+                <button id="search-btn" onclick="handleSearch()"
+                    class="group w-full bg-slate-900 border border-slate-900 text-white px-8 py-5 rounded-2xl font-medium hover:bg-white hover:text-slate-900 transition-all duration-300 flex items-center justify-center gap-3 active:scale-[0.98]"
+                    aria-label="Search flights">
+                    <span>Explore Destinations</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                 </button>
                 <button onclick="togglePriceAlert()"
                     class="p-5 rounded-full border border-slate-200 text-slate-400 hover:text-sky-500 hover:border-sky-500 transition-all active:scale-95 group"
@@ -215,13 +226,15 @@
                 Ready for takeoff?
             </span>
             <div class="flex items-center gap-4">
-                <div class="flex bg-slate-100 rounded-lg p-1 gap-1">
+                <div class="flex bg-slate-100 rounded-lg p-1 gap-1" role="tablist" aria-label="Result View Mode">
                     <button id="view-list"
                         class="px-3 py-1 text-sm font-medium rounded-md bg-white shadow-sm text-slate-900 transition-all"
-                        onclick="switchView('list')">List</button>
+                        onclick="switchView('list')" role="tab" aria-selected="true"
+                        aria-controls="results-grid">List</button>
                     <button id="view-map"
                         class="px-3 py-1 text-sm font-medium rounded-md text-slate-500 hover:text-slate-900 transition-all"
-                        onclick="switchView('map')">Map</button>
+                        onclick="switchView('map')" role="tab" aria-selected="false"
+                        aria-controls="map-container">Map</button>
                 </div>
                 <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full hidden text-sm font-medium"
                     id="active-filter">

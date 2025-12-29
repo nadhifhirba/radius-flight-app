@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
     // Check Cache
     const cacheKey = `${origin}-${maxPrice}`;
     if (searchCache[cacheKey]) {
-        console.log('Serving from cache:', cacheKey);
+
         return {
             statusCode: 200,
             body: JSON.stringify(searchCache[cacheKey]),
@@ -35,7 +35,7 @@ exports.handler = async (event, context) => {
         };
     }
 
-    console.log(`Searching flights from ${origin} under ${maxPrice}...`);
+    // Searching flights...
 
     try {
         // "Fake" Reverse Search strategy (Simulated Reverse Search)

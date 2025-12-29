@@ -1,30 +1,63 @@
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #F8FAFC;
-    color: #0f172a;
-    transition: background-color 0.5s ease, color 0.5s ease;
+:root {
+    /* Brand Colors */
+    --color-sky-500: #0ea5e9;
+    --color-slate-950: #020617;
+    --color-slate-900: #0f172a;
+    --color-slate-800: #1e293b;
+    --color-slate-700: #334155;
+    --color-slate-500: #64748b;
+    --color-slate-400: #94a3b8;
+    --color-slate-100: #f1f5f9;
+    --color-slate-50: #f8fafc;
+
+    /* Semantic Variables - Light */
+    --bg-main: #ffffff;
+    --bg-secondary: #f8fafc;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-main: #e2e8f0;
 }
 
-/* Dark Mode (Night Flight) */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-secondary);
+    color: var(--text-main);
+    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+/* Dark Mode (Night Flight Theme) */
 body.dark {
-    background-color: #020617;
-    /* Slate 950 */
-    color: #f1f5f9;
-    /* Slate 100 */
+    --bg-main: var(--color-slate-950);
+    --bg-secondary: var(--color-slate-950);
+    --text-main: var(--color-slate-100);
+    --text-muted: var(--color-slate-400);
+    --border-main: var(--color-slate-800);
+
+    background-color: var(--bg-main);
+    color: var(--text-main);
 }
 
 body.dark .text-slate-900 {
-    color: #f8fafc;
+    color: var(--color-slate-50);
     /* Force high contrast */
 }
 
 body.dark .text-slate-400 {
-    color: #94a3b8;
+    color: var(--color-slate-400);
 }
 
 body.dark nav {
     mix-blend-mode: normal;
     /* Fix visibility */
+}
+
+body.dark .flight-card {
+    background-color: var(--color-slate-900);
+    border: 1px solid var(--color-slate-800);
+}
+
+body.dark .border-slate-100 {
+    border-color: var(--color-slate-800);
 }
 
 /* Hide Scrollbar */
@@ -130,8 +163,7 @@ body.dark nav {
     background: transparent;
     border: none;
     border-bottom: 2px solid #e2e8f0;
-    color: #0EA5E9;
-    /* Sky Blue */
+    color: var(--color-sky-500);
     cursor: pointer;
     padding: 0 0.5rem;
     transition: border-color 0.3s ease, color 0.3s ease;
@@ -139,13 +171,13 @@ body.dark nav {
 }
 
 .mad-lib-select:hover {
-    border-color: #0EA5E9;
+    border-color: var(--color-sky-500);
 }
 
 .mad-lib-select:focus {
     outline: none;
-    border-color: #0f172a;
-    color: #0f172a;
+    border-color: var(--color-slate-900);
+    color: var(--color-slate-900);
 }
 
 /* Card Hover Effect */
@@ -180,21 +212,21 @@ body.dark nav {
 }
 
 body.dark #fullscreen-menu {
-    background-color: #020617;
-    color: #f1f5f9;
+    background-color: var(--color-slate-950);
+    color: var(--color-slate-100);
 }
 
 body.dark .mad-lib-select {
-    border-bottom-color: #1e293b;
+    border-bottom-color: var(--color-slate-800);
 }
 
 body.dark .mad-lib-select:focus {
-    color: #f1f5f9;
-    border-bottom-color: #0EA5E9;
+    color: var(--color-slate-100);
+    border-bottom-color: var(--color-sky-500);
 }
 
 body.dark button.bg-slate-900 {
-    background-color: #0f172a;
+    background-color: var(--color-slate-900);
     border: 1px solid rgba(14, 165, 233, 0.3);
     box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
 }
@@ -214,7 +246,7 @@ body.dark button.bg-slate-900 {
 
 body.dark .theme-toggle {
     background: rgba(30, 41, 59, 0.5);
-    color: #f1f5f9;
+    color: var(--color-slate-100);
 }
 
 @keyframes fadeUp {
@@ -294,6 +326,10 @@ body.dark .theme-toggle {
     top: 0;
 }
 
+body.dark .deal-meter-bar {
+    background: var(--color-slate-800);
+}
+
 /* Prediction Badge */
 .prediction-badge {
     position: absolute;
@@ -333,18 +369,36 @@ body.dark .theme-toggle {
     border: 1px solid rgba(241, 245, 249, 0.1);
     border-radius: 9999px;
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--color-slate-500);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 body.dark .search-chip {
     background: rgba(30, 41, 59, 0.5);
-    color: #94a3b8;
+    color: var(--color-slate-400);
 }
 
 .search-chip:hover {
-    background: #0EA5E9;
+    background: var(--color-sky-500);
     color: white;
-    border-color: #0EA5E9;
+    border-color: var(--color-sky-500);
+}
+
+/* Dark Mode Toggle Contrast Refinement */
+body.dark #results-section .bg-slate-100 {
+    background-color: var(--color-slate-800);
+}
+
+body.dark #results-section .bg-white {
+    background-color: var(--color-slate-700);
+    color: var(--color-slate-100);
+}
+
+body.dark #results-section .text-slate-500 {
+    color: var(--color-slate-400);
+}
+
+body.dark #results-section .border-slate-200 {
+    border-color: var(--color-slate-800);
 }

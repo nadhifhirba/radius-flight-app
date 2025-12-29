@@ -28,7 +28,14 @@ Radius is a "Reverse Search" flight discovery engine designed to help travelers 
 - **Backend API**: Amadeus Global Distribution System (GDS) via Node.js
 - **Deployment**: Netlify Serverless Functions
 
+
+## 📖 Documentation
+
+- [Deployment Guide](./docs/DEPLOYMENT_GUIDE.md): Instructions for deploying to Netlify and using Amadeus API.
+- [Update Guide](./docs/UPDATE_GUIDE.md): How to keep the app and its data fresh.
+
 ## 📄 License
+
 
 This project is proprietary. All rights are reserved by **NHADesign (Nadhif Hirba)**. Unauthorized use, reproduction, or distribution of this code, design, or brand is strictly prohibited. See the [LICENSE](./LICENSE) file for more details.
 

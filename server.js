@@ -31,11 +31,11 @@ app.get('/api/search', async (req, res) => {
 
         const cacheKey = `${origin}-${maxPrice}`;
         if (searchCache[cacheKey]) {
-            console.log('Serving from cache:', cacheKey);
+
             return res.json(searchCache[cacheKey]);
         }
 
-        console.log(`Searching flights from ${origin} under ${maxPrice}...`);
+        // Searching flights from origin under maxPrice...
 
         // "Fake" Reverse Search by checking curated popular destinations
         // This defeats the endpoint limitation in Sandbox

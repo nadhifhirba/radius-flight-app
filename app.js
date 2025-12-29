@@ -1,12 +1,12 @@
 // --- 1. Data & Config ---
 const MOCK_DATA = [
-    { id: 101, city: "Bali", airport: "DPS", country: "Indonesia", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=800&auto=format&fit=crop", price_one: 850000, price_round: 1600000, airline: "Super Air Jet", stops: 0, coords: [-8.748, 115.167], cheapestMonth: "March", cheapestPrice: 1400000, hotelPrice: 500000, historicalAvg: 1800000 },
+    { id: 101, city: "Bali", airport: "DPS", country: "Indonesia", img: "images/bali.jpg", price_one: 850000, price_round: 1600000, airline: "Super Air Jet", stops: 0, coords: [-8.748, 115.167], cheapestMonth: "March", cheapestPrice: 1400000, hotelPrice: 500000, historicalAvg: 1800000 },
     { id: 102, city: "Yogyakarta", airport: "YIA", country: "Indonesia", img: "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?q=80&w=800&auto=format&fit=crop", price_one: 550000, price_round: 1000000, airline: "Lion Air", stops: 0, coords: [-7.975, 110.429], cheapestMonth: "February", cheapestPrice: 900000, hotelPrice: 300000, historicalAvg: 1200000 },
     { id: 103, city: "Singapore", airport: "SIN", country: "Singapore", img: "https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800&auto=format&fit=crop", price_one: 950000, price_round: 2100000, airline: "JetStar", stops: 0, coords: [1.364, 103.991], cheapestMonth: "April", cheapestPrice: 1800000, hotelPrice: 1500000, historicalAvg: 2500000 },
-    { id: 104, city: "Kuala Lumpur", airport: "KUL", country: "Malaysia", img: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800&auto=format&fit=crop", price_one: 700000, price_round: 1300000, airline: "AirAsia", stops: 0, coords: [2.745, 101.707], cheapestMonth: "March", cheapestPrice: 1100000, hotelPrice: 400000, historicalAvg: 1500000 },
+    { id: 104, city: "Kuala Lumpur", airport: "KUL", country: "Malaysia", img: "images/kl.jpg", price_one: 700000, price_round: 1300000, airline: "AirAsia", stops: 0, coords: [2.745, 101.707], cheapestMonth: "March", cheapestPrice: 1100000, hotelPrice: 400000, historicalAvg: 1500000 },
     { id: 105, city: "Bangkok", airport: "DMK", country: "Thailand", img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=800&auto=format&fit=crop", price_one: 1800000, price_round: 3200000, airline: "AirAsia", stops: 1, coords: [13.913, 100.607], cheapestMonth: "May", cheapestPrice: 2000000, hotelPrice: 600000, historicalAvg: 3000000 },
     { id: 106, city: "Labuan Bajo", airport: "LBJ", country: "Indonesia", img: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?q=80&w=800&auto=format&fit=crop", price_one: 1900000, price_round: 3500000, airline: "Batik Air", stops: 0, coords: [-8.485, 119.883], cheapestMonth: "November", cheapestPrice: 2800000, hotelPrice: 1000000, historicalAvg: 4000000 },
-    { id: 107, city: "Tokyo", airport: "NRT", country: "Japan", img: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?q=80&w=800&auto=format&fit=crop", price_one: 4500000, price_round: 8500000, airline: "Scoot", stops: 1, coords: [35.772, 140.393], cheapestMonth: "June", cheapestPrice: 7500000, hotelPrice: 1500000, historicalAvg: 9000000 },
+    { id: 107, city: "Tokyo", airport: "NRT", country: "Japan", img: "images/tokyo.jpg", price_one: 4500000, price_round: 8500000, airline: "Scoot", stops: 1, coords: [35.772, 140.393], cheapestMonth: "June", cheapestPrice: 7500000, hotelPrice: 1500000, historicalAvg: 9000000 },
     { id: 108, city: "Lombok", airport: "LOP", country: "Indonesia", img: "https://images.unsplash.com/photo-1573790387438-4da905039392?q=80&w=800&auto=format&fit=crop", price_one: 900000, price_round: 1750000, airline: "Super Air Jet", stops: 0, coords: [-8.762, 116.273], cheapestMonth: "February", cheapestPrice: 1500000, hotelPrice: 600000, historicalAvg: 2000000 },
     { id: 109, city: "Johor Bahru", airport: "JHB", country: "Malaysia", img: "https://images.unsplash.com/photo-1559635071-f938c82eb4db?q=80&w=800", price_one: 500000, price_round: 950000, airline: "AirAsia", stops: 0, coords: [1.636, 103.666], isHiddenGem: true, relatedTo: "Singapore", cheapestMonth: "March", cheapestPrice: 800000, hotelPrice: 350000, historicalAvg: 1100000 },
     { id: 110, city: "Banyuwangi", airport: "BWX", country: "Indonesia", img: "https://images.unsplash.com/photo-1543887019-c0ae985e51c8?q=80&w=800", price_one: 650000, price_round: 1200000, airline: "Citilink", stops: 0, coords: [-8.307, 114.3], isHiddenGem: true, relatedTo: "Bali", cheapestMonth: "April", cheapestPrice: 1000000, hotelPrice: 250000, historicalAvg: 1400000 }
@@ -14,14 +14,14 @@ const MOCK_DATA = [
 
 // Database for mapping real API results to images/cities
 const AIRPORT_DB = {
-    "DPS": { city: "Bali", country: "Indonesia", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=800", coords: [-8.748, 115.167] },
+    "DPS": { city: "Bali", country: "Indonesia", img: "images/bali.jpg", coords: [-8.748, 115.167] },
     "YIA": { city: "Yogyakarta", country: "Indonesia", img: "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?q=80&w=800", coords: [-7.975, 110.429] },
     "SIN": { city: "Singapore", country: "Singapore", img: "https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800", coords: [1.364, 103.991] },
-    "KUL": { city: "Kuala Lumpur", country: "Malaysia", img: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800", coords: [2.745, 101.707] },
+    "KUL": { city: "Kuala Lumpur", country: "Malaysia", img: "images/kl.jpg", coords: [2.745, 101.707] },
     "DMK": { city: "Bangkok", country: "Thailand", img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=800", coords: [13.913, 100.607] },
     "BKK": { city: "Bangkok", country: "Thailand", img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=800", coords: [13.690, 100.750] },
-    "NRT": { city: "Tokyo", country: "Japan", img: "https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?q=80&w=800", coords: [35.772, 140.393] },
-    "HND": { city: "Tokyo", country: "Japan", img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?q=80&w=800", coords: [35.549, 139.779] },
+    "NRT": { city: "Tokyo", country: "Japan", img: "images/tokyo.jpg", coords: [35.772, 140.393] },
+    "HND": { city: "Tokyo", country: "Japan", img: "images/tokyo.jpg", coords: [35.549, 139.779] },
     "ICN": { city: "Seoul", country: "South Korea", img: "https://images.unsplash.com/photo-1538485399081-7191377e8241?q=80&w=800", coords: [37.460, 126.440] },
     "HKG": { city: "Hong Kong", country: "Hong Kong", img: "https://images.unsplash.com/photo-1506318164473-2dfd3ede3623?q=80&w=800", coords: [22.308, 113.918] },
     "SGN": { city: "Ho Chi Minh City", country: "Vietnam", img: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=800", coords: [10.818, 106.651] },
@@ -96,13 +96,18 @@ function toggleDarkMode() {
 // --- Search History ---
 function saveSearch(searchData) {
     const history = JSON.parse(localStorage.getItem('radiusHistory') || '[]');
-    // Prevent duplicates
-    const searchString = `${searchData.origin} to ${searchData.geoScope} (${searchData.budget})`;
-    const filtered = history.filter(h => `${h.origin} to ${h.geoScope} (${h.budget})` !== searchString);
 
-    filtered.unshift(searchData);
-    const newHistory = filtered.slice(0, 5);
-    localStorage.setItem('radiusHistory', JSON.stringify(newHistory));
+    // Create a unique key for comparison
+    const searchKey = s => `${s.origin}-${s.geoScope}-${s.budget}`;
+    const newKey = searchKey(searchData);
+
+    // Filter out if already exists, then add to front
+    const updatedHistory = [
+        searchData,
+        ...history.filter(h => searchKey(h) !== newKey)
+    ].slice(0, 5);
+
+    localStorage.setItem('radiusHistory', JSON.stringify(updatedHistory));
     renderRecentSearches();
 }
 
@@ -198,18 +203,22 @@ function switchView(view) {
     if (view === 'list') {
         listBtn.classList.remove('text-slate-500');
         listBtn.classList.add('bg-white', 'shadow-sm', 'text-slate-900');
+        listBtn.setAttribute('aria-selected', 'true');
 
         mapBtn.classList.remove('bg-white', 'shadow-sm', 'text-slate-900');
         mapBtn.classList.add('text-slate-500');
+        mapBtn.setAttribute('aria-selected', 'false');
 
         grid.classList.remove('hidden');
         mapContainer.classList.add('hidden');
     } else {
         mapBtn.classList.remove('text-slate-500');
         mapBtn.classList.add('bg-white', 'shadow-sm', 'text-slate-900');
+        mapBtn.setAttribute('aria-selected', 'true');
 
         listBtn.classList.remove('bg-white', 'shadow-sm', 'text-slate-900');
         listBtn.classList.add('text-slate-500');
+        listBtn.setAttribute('aria-selected', 'false');
 
         grid.classList.add('hidden');
         mapContainer.classList.remove('hidden');
@@ -261,7 +270,7 @@ async function handleSearch(skipGridAnimation = false) {
     let isLive = false;
 
     try {
-        console.log(`Fetching from API: origin=${originCode}&maxPrice=${budget}`);
+
         const response = await fetch(`/api/search?origin=${originCode}&maxPrice=${budget}`);
         if (response.ok) {
             const apiData = await response.json();
@@ -356,17 +365,13 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
     grid.innerHTML = '';
 
     if (filtered.length === 0) {
-        grid.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 text-slate-400">
-                    <i data-lucide="plane-off" class="w-10 h-10"></i>
-                </div>
-                <h3 class="text-3xl md:text-5xl font-light tracking-tight mb-4">No flights found.</h3>
-                <p class="text-xl text-slate-500 mb-8 max-w-lg">
-                   We couldn't find flights within this budget ${isLive ? 'from Amadeus Live Data' : ''}.
-                </p>
-            </div>
-        `;
+        const template = document.getElementById('zero-state-template');
+        const clone = template.content.cloneNode(true);
+        const p = clone.querySelector('p');
+        if (p && isLive) {
+            p.innerText += " (Live data check performed)";
+        }
+        grid.appendChild(clone);
         countLabel.innerText = "No flights found.";
         lucide.createIcons();
         return;
@@ -398,8 +403,12 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         card.style.animation = `fadeUp 0.6s ease forwards ${index * 0.1}s`;
 
         card.innerHTML = `
-            <div class="relative h-48 overflow-hidden shrink-0">
-                <img src="${f.img}" alt="${sanitize(f.city)}" loading="lazy" class="card-image w-full h-full object-cover transition-transform duration-700">
+            <div class="relative h-48 overflow-hidden shrink-0 bg-slate-100">
+                <img src="${f.img}" 
+                     alt="${sanitize(f.city)}" 
+                     loading="lazy" 
+                     onerror="this.src='https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=800&q=80'; this.onerror=null;"
+                     class="card-image w-full h-full object-cover transition-transform duration-700">
                 <div class="absolute top-4 right-4">
                      <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Direct</span>
                 </div>
