@@ -14,6 +14,9 @@ Radius is a "Reverse Search" flight discovery engine designed to help travelers 
   - **Deal Meter**: Instantly see if a flight is a "Great Value" compared to historical averages.
   - **Trip Est**: includes estimated hotel costs to give you the "real" price of a weekend away.
 - **Hidden Gem Alerts**: Highlights under-the-radar destinations that offer incredible value.
+- **Night Flight (Dark Mode)**: Refined dark theme for nocturnal travelers with high-contrast accessibility.
+- **Search Persistence**: Automatically remembers your recent journeys for quick re-entry.
+- **Google Sign-In Ready**: Integrated authentication flow for personalized experiences.
 - **Domestic Toggle**: One-click filtering for travelers wanting to explore their own backyard.
 
 ## 🛠 Tech Stack

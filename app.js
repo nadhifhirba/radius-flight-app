@@ -35,6 +35,13 @@ const AIRPORT_DB = {
     "AMS": { city: "Amsterdam", country: "Netherlands", img: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?q=80&w=800", coords: [52.310, 4.768] }
 };
 
+// --- Advanced Features State ---
+let userProfile = null;
+let searchHistory = JSON.parse(localStorage.getItem('radiusHistory') || '[]');
+const IS_DARK_MODE = localStorage.getItem('darkMode') === 'true';
+
+if (IS_DARK_MODE) document.body.classList.add('dark');
+
 // --- 2. Utils & View Logic ---
 
 // Utility: Sanitize text for innerHTML safety
@@ -69,6 +76,111 @@ function togglePriceAlert() {
     const origin = document.getElementById('origin').value;
     const budget = document.getElementById('budget').value;
     showToast(`Alert set for flights from ${origin} under ${formatCurrency(budget)}`, 'info');
+}
+
+// --- Dark Mode ---
+function toggleDarkMode() {
+    const isDark = document.body.classList.toggle('dark');
+    localStorage.setItem('darkMode', isDark);
+
+    // Update Icons
+    const themeIcon = document.getElementById('theme-icon-nav');
+    if (themeIcon) {
+        themeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        lucide.createIcons();
+    }
+
+    showToast(`${isDark ? 'Night Flight' : 'Standard View'} activated`, 'info');
+}
+
+// --- Search History ---
+function saveSearch(searchData) {
+    const history = JSON.parse(localStorage.getItem('radiusHistory') || '[]');
+    // Prevent duplicates
+    const searchString = `${searchData.origin} to ${searchData.geoScope} (${searchData.budget})`;
+    const filtered = history.filter(h => `${h.origin} to ${h.geoScope} (${h.budget})` !== searchString);
+
+    filtered.unshift(searchData);
+    const newHistory = filtered.slice(0, 5);
+    localStorage.setItem('radiusHistory', JSON.stringify(newHistory));
+    renderRecentSearches();
+}
+
+function renderRecentSearches() {
+    const history = JSON.parse(localStorage.getItem('radiusHistory') || '[]');
+    const container = document.getElementById('recent-searches-container');
+    const list = document.getElementById('recent-searches-list');
+
+    if (history.length === 0) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    container.classList.remove('hidden');
+    list.innerHTML = history.map(h => `
+        <div class="search-chip" onclick="applyHistorySearch('${h.origin}', '${h.budget}', '${h.tripType}', '${h.geoScope}', '${h.datePref}')">
+            ${h.origin} → ${h.geoScope === 'domestic' ? 'Indonesia' : 'World'} (Rp ${parseInt(h.budget).toLocaleString()})
+        </div>
+    `).join('');
+}
+
+function applyHistorySearch(origin, budget, tripType, geoScope, datePref) {
+    document.getElementById('origin').value = origin;
+    document.getElementById('budget').value = budget;
+    document.getElementById('tripType').value = tripType;
+    document.getElementById('geoScope').value = geoScope;
+    document.getElementById('datePref').value = datePref;
+    handleSearch();
+}
+
+// --- Google Sign-in ---
+window.onload = function () {
+    google.accounts.id.initialize({
+        client_id: "623880628373-idsh23p8i730.apps.googleusercontent.com", // Mock ID
+        callback: handleCredentialResponse
+    });
+
+    // Hidden render to enable logic
+    google.accounts.id.renderButton(
+        document.getElementById("google-signin-hidden"),
+        { theme: "outline", size: "large" }
+    );
+};
+
+function triggerGoogleSignIn() {
+    // Programmatically trigger the Google Sign-in
+    // Note: Standard GSI doesn't allow direct JS trigger, so we show the hidden button or prompt one-tap
+    google.accounts.id.prompt();
+    showToast("Redirecting to Google...", "info");
+}
+
+function handleCredentialResponse(response) {
+    // Decoding JWT payload
+    const responsePayload = decodeJwtResponse(response.credential);
+    userProfile = {
+        name: responsePayload.name,
+        picture: responsePayload.picture
+    };
+    updateUIWithUser();
+    showToast(`Welcome back, ${userProfile.name}!`, 'success');
+}
+
+function decodeJwtResponse(token) {
+    let base64Url = token.split('.')[1];
+    let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    let jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
+
+function updateUIWithUser() {
+    if (!userProfile) return;
+    document.getElementById('account-link').classList.add('hidden');
+    const profile = document.getElementById('user-profile');
+    profile.classList.remove('hidden');
+    document.getElementById('user-avatar').src = userProfile.picture;
+    document.getElementById('user-name').innerText = userProfile.name;
 }
 
 let map = null;
@@ -201,6 +313,9 @@ async function handleSearch(skipGridAnimation = false) {
         return matchesBudget && matchesGeo;
     });
 
+    // Save Search
+    saveSearch({ origin: originSelect.value, budget, tripType, geoScope, datePref: document.getElementById('datePref').value });
+
     renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive);
 }
 
@@ -271,6 +386,10 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         if (ratio < 0.8) { dealLabel = "Great Value"; dealClass = "text-emerald-600"; barColor = "bg-emerald-500"; barWidth = "90%"; }
         else if (ratio > 1.1) { dealLabel = "Standard"; dealClass = "text-orange-500"; barColor = "bg-orange-500"; barWidth = "30%"; }
 
+        // Prediction Logic (Mock)
+        const prediction = ratio < 0.85 ? "Buy Now" : "Wait";
+        const predictionClass = prediction === "Buy Now" ? "prediction-buy" : "prediction-wait";
+
         const dateStr = f.departureDate ? `on ${f.departureDate}` : '';
         const deepLink = `https://www.google.com/travel/flights?q=Flights to ${f.airport} from ${originCode} ${dateStr}`;
 
@@ -281,8 +400,11 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         card.innerHTML = `
             <div class="relative h-48 overflow-hidden shrink-0">
                 <img src="${f.img}" alt="${sanitize(f.city)}" loading="lazy" class="card-image w-full h-full object-cover transition-transform duration-700">
-                <div class="absolute top-4 left-4">
+                <div class="absolute top-4 right-4">
                      <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Direct</span>
+                </div>
+                <div class="prediction-badge ${predictionClass}">
+                    ${prediction}
                 </div>
             </div>
             <div class="p-6 flex flex-col gap-4 flex-1">
@@ -310,6 +432,15 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
 
 document.addEventListener("DOMContentLoaded", function () {
     lucide.createIcons();
+    renderRecentSearches();
+
+    // Set initial mode status text
+    const isDark = document.body.classList.contains('dark');
+    const themeIcon = document.getElementById('theme-icon-nav');
+    if (themeIcon) {
+        themeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        lucide.createIcons();
+    }
 
     const revealElements = document.querySelectorAll('.reveal-text');
     revealElements.forEach(element => {

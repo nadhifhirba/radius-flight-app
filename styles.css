@@ -1,9 +1,30 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: #F8FAFC;
-    /* Cloud White */
     color: #0f172a;
-    /* Slate 900 */
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Dark Mode (Night Flight) */
+body.dark {
+    background-color: #020617;
+    /* Slate 950 */
+    color: #f1f5f9;
+    /* Slate 100 */
+}
+
+body.dark .text-slate-900 {
+    color: #f8fafc;
+    /* Force high contrast */
+}
+
+body.dark .text-slate-400 {
+    color: #94a3b8;
+}
+
+body.dark nav {
+    mix-blend-mode: normal;
+    /* Fix visibility */
 }
 
 /* Hide Scrollbar */
@@ -158,6 +179,44 @@ body {
     transform: translateY(-100%);
 }
 
+body.dark #fullscreen-menu {
+    background-color: #020617;
+    color: #f1f5f9;
+}
+
+body.dark .mad-lib-select {
+    border-bottom-color: #1e293b;
+}
+
+body.dark .mad-lib-select:focus {
+    color: #f1f5f9;
+    border-bottom-color: #0EA5E9;
+}
+
+body.dark button.bg-slate-900 {
+    background-color: #0f172a;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.1);
+}
+
+/* Theme Toggle in Nav */
+.theme-toggle {
+    padding: 0.5rem;
+    border-radius: 9999px;
+    background: rgba(241, 245, 249, 0.5);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+body.dark .theme-toggle {
+    background: rgba(30, 41, 59, 0.5);
+    color: #f1f5f9;
+}
+
 @keyframes fadeUp {
     to {
         opacity: 1;
@@ -233,4 +292,59 @@ body {
     position: absolute;
     left: 0;
     top: 0;
+}
+
+/* Prediction Badge */
+.prediction-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 20;
+    padding: 0.4rem 0.8rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(8px);
+}
+
+.prediction-buy {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.prediction-wait {
+    background: rgba(245, 158, 11, 0.9);
+    color: white;
+}
+
+/* Recent Search Styles */
+.recent-searches {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.search-chip {
+    padding: 0.5rem 1rem;
+    background: rgba(241, 245, 249, 0.1);
+    border: 1px solid rgba(241, 245, 249, 0.1);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+body.dark .search-chip {
+    background: rgba(30, 41, 59, 0.5);
+    color: #94a3b8;
+}
+
+.search-chip:hover {
+    background: #0EA5E9;
+    color: white;
+    border-color: #0EA5E9;
 }

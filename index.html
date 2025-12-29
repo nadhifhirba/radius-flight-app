@@ -30,6 +30,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -64,12 +65,18 @@
                     About
                 </span>
             </a>
-            <a href="#" class="group relative overflow-hidden">
+            <a href="#" onclick="triggerGoogleSignIn()" id="account-link" class="group relative overflow-hidden">
                 <span
                     class="block text-5xl md:text-7xl lg:text-8xl tracking-tighter font-light hover:text-sky-500 transition-colors duration-300">
                     Account
                 </span>
             </a>
+            <div id="user-profile" class="hidden flex flex-col items-center">
+                <img id="user-avatar" src="" alt="Avatar" class="w-20 h-20 rounded-full mb-4 ring-2 ring-sky-500 p-1">
+                <span id="user-name" class="text-3xl font-light tracking-tighter"></span>
+            </div>
+            <!-- Hidden Google Sign-in Trigger -->
+            <div id="google-signin-hidden" style="display: none;"></div>
         </div>
         <div
             class="relative z-10 w-full px-6 py-6 md:px-12 md:pb-12 flex flex-col md:flex-row justify-between items-end text-sm md:text-base text-slate-400">
@@ -92,10 +99,15 @@
         <div class="text-xl md:text-2xl font-semibold tracking-tighter pointer-events-auto reveal-text">
             radius.
         </div>
-        <button onclick="toggleMenu()"
-            class="text-lg font-medium pointer-events-auto hover:opacity-60 transition-opacity reveal-text">
-            Menu
-        </button>
+        <div class="flex items-center gap-4 reveal-text pointer-events-auto">
+            <button onclick="toggleDarkMode()" class="theme-toggle hover:scale-110 transition-transform"
+                title="Toggle Night Flight">
+                <i data-lucide="moon" id="theme-icon-nav" class="w-5 h-5"></i>
+            </button>
+            <button onclick="toggleMenu()" class="text-lg font-medium hover:opacity-60 transition-opacity">
+                Menu
+            </button>
+        </div>
     </nav>
 
     <!-- Hero / Search Section -->
@@ -183,6 +195,11 @@
                     title="Set Price Alert">
                     <i data-lucide="bell" class="w-6 h-6 group-hover:shake"></i>
                 </button>
+            </div>
+            <!-- Search History -->
+            <div id="recent-searches-container" class="mt-8 hidden">
+                <p class="text-sm uppercase tracking-widest text-slate-400 font-semibold mb-4">Recent Journeys</p>
+                <div id="recent-searches-list" class="flex flex-wrap gap-2"></div>
             </div>
         </div>
     </header>
