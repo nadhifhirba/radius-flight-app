@@ -396,7 +396,12 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         const predictionClass = prediction === "Buy Now" ? "prediction-buy" : "prediction-wait";
 
         const dateStr = f.departureDate ? `on ${f.departureDate}` : '';
-        const deepLink = `https://www.google.com/travel/flights?q=Flights to ${f.airport} from ${originCode} ${dateStr}`;
+        // Indonesian destinations use Traveloka, international use Kiwi.com
+        const INDONESIAN_AIRPORTS = ['DPS', 'SUB', 'KNO', 'LBJ', 'LOP', 'JOG', 'BPN', 'PLM', 'MDC', 'UPG', 'YIA'];
+        const isIndonesian = INDONESIAN_AIRPORTS.includes(f.airport);
+        const deepLink = isIndonesian
+            ? `https://www.traveloka.com/en-id/flight/${originCode}/to/${f.airport}/${f.departureDate || dateStr}/1/ECONOMY`
+            : `https://www.kiwi.com/en/search/results/${originCode}/${f.airport}/${f.departureDate || dateStr}/no-return?currency=IDR&adults=1&ref=nhadesign`;
 
         const card = document.createElement('div');
         card.className = "group flight-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 opacity-0 translate-y-8 flex flex-col";
@@ -430,7 +435,7 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
                         <span class="block text-xl font-semibold tracking-tight text-slate-900">${formatCurrency(cost)}</span>
                         <span class="text-xs text-slate-400 font-medium">${sanitize(f.departureDate ? f.departureDate : (tripType === 'one' ? 'One Way' : 'Round Trip'))}</span>
                     </div>
-                    <a href="${deepLink}" target="_blank" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors">Book</a>
+                    <a href="${deepLink}" target="_blank" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors affiliate-link" data-destination="${f.airport}" data-origin="${originCode}">Book</a>
                 </div>
             </div>
         `;
@@ -486,3 +491,14 @@ function toggleMenu() {
     menu.classList.toggle('menu-open');
     menu.classList.toggle('menu-closed');
 }
+
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('.affiliate-link');
+    if (link) {
+        const dest = link.dataset.destination;
+        const origin = link.dataset.origin;
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'affiliate_click', { destination: dest, origin: origin });
+        }
+    }
+});
