@@ -1,10 +1,9 @@
 // --- Travelpayouts Affiliate Config ---
-// Add p= program IDs here when TP approves each program.
-// Find them: TP Dashboard → Programs → click program → Get Link → p=XXXX in URL
+// Aviasales uses ?marker= directly (TP's own product, no p= needed)
+// Other TP programs: find p= at TP Dashboard → Programs → program → Get Link → p=XXXX in URL
 const TP = {
     marker: '512833',
     programs: {
-        aviasales: null,   // TP's own flight search — instant approval, fill in p= when approved
         traveloka: null,   // Indonesian flights — fill in p= when approved
         klook: null,       // Activities — fill in p= when approved
         tripcom: null,     // Hotels + flights — fill in p= when approved
@@ -14,6 +13,13 @@ const TP = {
 function buildTPLink(destUrl, programId) {
     if (!programId) return destUrl;
     return `https://tp.media/r?marker=${TP.marker}&p=${programId}&u=${encodeURIComponent(destUrl)}`;
+}
+
+function buildAviasalesLink(origin, dest, date) {
+    // Aviasales format: /search/ORIGMMDDDES1?marker=MARKER
+    const mmdd = date && date.length === 10 ? date.slice(5).replace('-', '') : '';
+    const path = mmdd ? `${origin}${mmdd}${dest}1` : `${origin}${dest}`;
+    return `https://www.aviasales.com/search/${path}?marker=${TP.marker}`;
 }
 
 // --- 1. Data & Config ---
@@ -467,13 +473,11 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         const safeOrigin = /^[A-Z]{3}$/.test(originCode) ? originCode : 'CGK';
         const safeAirport = /^[A-Z]{3}$/.test(f.airport) ? f.airport : '';
         const safeDate = f.departureDate ? f.departureDate.replace(/[^0-9-]/g, '') : dateStr;
-        // TP-tracked links — buildTPLink falls back to direct URL if program not yet approved
-        const rawLink = isIndonesian
-            ? `https://www.traveloka.com/en-id/flight/${safeOrigin}/to/${safeAirport}/${safeDate}/1/ECONOMY`
-            : `https://www.aviasales.com/search/${safeOrigin}${safeDate.replace(/-/g, '').slice(4)}${safeAirport}1`;
+        // TP-tracked links — Aviasales uses ?marker= directly, others use tp.media/r
+        const travelokaRaw = `https://www.traveloka.com/en-id/flight/${safeOrigin}/to/${safeAirport}/${safeDate}/1/ECONOMY`;
         const deepLink = isIndonesian
-            ? buildTPLink(rawLink, TP.programs.traveloka)
-            : buildTPLink(rawLink, TP.programs.aviasales);
+            ? buildTPLink(travelokaRaw, TP.programs.traveloka)
+            : buildAviasalesLink(safeOrigin, safeAirport, f.departureDate);
 
         const card = document.createElement('div');
         card.className = "group flight-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 opacity-0 translate-y-8 flex flex-col";
