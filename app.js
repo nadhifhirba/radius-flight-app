@@ -42,6 +42,15 @@ const MOCK_DATA = [
 const AIRPORT_DB = {
     "DPS": { city: "Bali", country: "Indonesia", img: "images/bali.jpg", coords: [-8.748, 115.167] },
     "YIA": { city: "Yogyakarta", country: "Indonesia", img: "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?q=80&w=800", coords: [-7.975, 110.429] },
+    "JOG": { city: "Yogyakarta", country: "Indonesia", img: "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?q=80&w=800", coords: [-7.788, 110.432] },
+    "SUB": { city: "Surabaya", country: "Indonesia", img: "https://images.unsplash.com/photo-1555899434-94d1368aa7af?q=80&w=800", coords: [-7.380, 112.787] },
+    "KNO": { city: "Medan", country: "Indonesia", img: "https://images.unsplash.com/photo-1605640840605-14ac1855827b?q=80&w=800", coords: [3.644, 98.885] },
+    "PLM": { city: "Palembang", country: "Indonesia", img: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800", coords: [-2.898, 104.700] },
+    "BPN": { city: "Balikpapan", country: "Indonesia", img: "https://images.unsplash.com/photo-1588392382834-a891154bca4d?q=80&w=800", coords: [1.268, 116.894] },
+    "MDC": { city: "Manado", country: "Indonesia", img: "https://images.unsplash.com/photo-1621412759538-bc3e4b75aece?q=80&w=800", coords: [1.549, 124.926] },
+    "UPG": { city: "Makassar", country: "Indonesia", img: "https://images.unsplash.com/photo-1597211684565-dca64d72bdfe?q=80&w=800", coords: [-5.061, 119.554] },
+    "LBJ": { city: "Labuan Bajo", country: "Indonesia", img: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?q=80&w=800", coords: [-8.485, 119.883] },
+    "LOP": { city: "Lombok", country: "Indonesia", img: "https://images.unsplash.com/photo-1573790387438-4da905039392?q=80&w=800", coords: [-8.762, 116.273] },
     "SIN": { city: "Singapore", country: "Singapore", img: "https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800", coords: [1.364, 103.991] },
     "KUL": { city: "Kuala Lumpur", country: "Malaysia", img: "images/kl.jpg", coords: [2.745, 101.707] },
     "DMK": { city: "Bangkok", country: "Thailand", img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?q=80&w=800", coords: [13.913, 100.607] },
@@ -79,7 +88,7 @@ const sanitize = (str) => {
 };
 
 const formatCurrency = (val) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumSignificantDigits: 3 }).format(val);
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
 };
 
 const showToast = (message, type = 'success') => {

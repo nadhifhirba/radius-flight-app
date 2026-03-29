@@ -36,7 +36,7 @@ def search_destination(origin_airport, destination_code, travel_date):
         cheapest = flights[0]
         return {
             "destination": destination_code,
-            "price": cheapest.price,  # fli returns IDR directly for Indonesian departures
+            "price": cheapest.price,  # fli returns USD
             "airline": cheapest.legs[0].airline.value,
         }
     except Exception:
@@ -79,7 +79,8 @@ class handler(BaseHTTPRequestHandler):
                 result = future.result()
                 if result is None:
                     continue
-                price_idr = int(result["price"])
+                USD_TO_IDR = 16200
+                price_idr = int(result["price"] * USD_TO_IDR)
                 if price_idr <= max_price_idr:
                     results.append({
                         "destination": result["destination"],
