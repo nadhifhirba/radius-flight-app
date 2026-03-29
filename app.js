@@ -73,19 +73,30 @@ const showToast = (message, type = 'success') => {
 };
 
 function togglePriceAlert() {
-    document.getElementById('alert-modal').classList.remove('hidden');
+    const modal = document.getElementById('alert-modal');
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-modal', 'true');
+    setTimeout(() => document.getElementById('alert-email').focus(), 50);
 }
 
 function closeAlertModal() {
     document.getElementById('alert-modal').classList.add('hidden');
 }
 
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('alert-modal');
+        if (!modal.classList.contains('hidden')) closeAlertModal();
+    }
+});
+
 async function submitPriceAlert() {
     const email = document.getElementById('alert-email').value.trim();
     const origin = document.getElementById('origin').value;
     const budget = document.getElementById('budget').value;
 
-    if (!email || !email.includes('@')) {
+    const emailInput = document.getElementById('alert-email');
+    if (!email || !emailInput.validity.valid) {
         showToast('Masukkan email yang valid', 'error');
         return;
     }
@@ -177,7 +188,7 @@ function applyHistorySearch(origin, budget, tripType, geoScope, datePref) {
 // --- Google Sign-in ---
 window.onload = function () {
     google.accounts.id.initialize({
-        client_id: "623880628373-idsh23p8i730.apps.googleusercontent.com", // Mock ID
+        client_id: window.GOOGLE_CLIENT_ID || '',
         callback: handleCredentialResponse
     });
 
@@ -346,7 +357,7 @@ async function handleSearch(skipGridAnimation = false) {
             throw new Error("Server not reachable");
         }
     } catch (err) {
-        console.warn("API Fetch Failed, falling back to mock data.", err);
+        void err;
         showToast("Live/Local Server unavailable. Using Mock Data.", "info");
         results = MOCK_DATA;
     }
@@ -386,9 +397,10 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
                 radius: 8, fillColor: color, color: '#ffffff', weight: 2, opacity: 1, fillOpacity: 0.8
             }).addTo(map);
 
+            const safePopupImg = /^https:\/\//.test(f.img) ? f.img : '';
             circle.bindPopup(`
                 <div class="p-3">
-                    <img src="${f.img}" class="w-full h-24 object-cover rounded-lg mb-2" loading="lazy">
+                    ${safePopupImg ? `<img src="${safePopupImg}" width="200" height="96" class="w-full h-24 object-cover rounded-lg mb-2" loading="lazy" alt="${sanitize(f.city)}">` : ''}
                     <h4 class="font-bold text-slate-900">${sanitize(f.city)}</h4>
                     <p class="text-xs text-slate-500 mb-2">${sanitize(f.airport)}</p>
                     <p class="text-sm font-semibold text-sky-600">${formatCurrency(cost)}</p>
@@ -448,9 +460,10 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
 
         card.innerHTML = `
             <div class="relative h-48 overflow-hidden shrink-0 bg-slate-100">
-                <img src="${f.img}" 
-                     alt="${sanitize(f.city)}" 
-                     loading="lazy" 
+                <img src="${f.img}"
+                     alt="${sanitize(f.city)}"
+                     width="800" height="192"
+                     loading="lazy"
                      onerror="this.src='https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=800&q=80'; this.onerror=null;"
                      class="card-image w-full h-full object-cover transition-transform duration-700">
                 <div class="absolute top-4 right-4">
@@ -527,8 +540,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function toggleMenu() {
     const menu = document.getElementById('fullscreen-menu');
-    menu.classList.toggle('menu-open');
+    const opening = menu.classList.toggle('menu-open');
     menu.classList.toggle('menu-closed');
+    menu.setAttribute('aria-hidden', opening ? 'false' : 'true');
 }
 
 document.addEventListener('click', (e) => {

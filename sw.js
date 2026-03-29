@@ -1,14 +1,10 @@
-const CACHE_NAME = 'radius-v1';
+const CACHE_NAME = 'radius-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/styles.css',
+    '/tailwind.css',
     '/app.js',
-    'https://cdn.tailwindcss.com',
-    'https://unpkg.com/lucide@latest',
-    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap',
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
     '/icons/icon-192.png',
     '/icons/icon-512.png'
 ];
@@ -17,7 +13,6 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('Caching stable assets');
             return cache.addAll(ASSETS_TO_CACHE);
         })
     );
@@ -36,7 +31,6 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
-    // Only cache GET requests
     if (event.request.method !== 'GET') return;
 
     event.respondWith(
@@ -44,15 +38,13 @@ self.addEventListener('fetch', (event) => {
             if (cachedResponse) return cachedResponse;
 
             return fetch(event.request).then((networkResponse) => {
-                // Don't cache API search results (they should be live)
-                if (event.request.url.includes('/api/search')) return networkResponse;
+                if (event.request.url.includes('/api/')) return networkResponse;
 
                 return caches.open(CACHE_NAME).then((cache) => {
                     cache.put(event.request, networkResponse.clone());
                     return networkResponse;
                 });
             }).catch(() => {
-                // Return index.html as fallback for navigation requests
                 if (event.request.mode === 'navigate') {
                     return caches.match('/index.html');
                 }
