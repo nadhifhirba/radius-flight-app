@@ -88,9 +88,9 @@ const showToast = (message, type = 'success') => {
     const color = type === 'success' ? 'bg-emerald-500' : 'bg-slate-800';
     toast.className = `${color} text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium toast pointer-events-auto flex items-center gap-2`;
     // Toast messages are static in this app, but sanitizing is good practice
-    toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'bell'}" class="w-4 h-4"></i> ${sanitize(message)}`;
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : '•';
+    toast.innerHTML = `<span class="font-bold">${icon}</span> ${sanitize(message)}`;
     container.appendChild(toast);
-    lucide.createIcons();
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(10px)';
@@ -160,7 +160,7 @@ function toggleDarkMode() {
     const themeIcon = document.getElementById('theme-icon-nav');
     if (themeIcon) {
         themeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     showToast(`${isDark ? 'Night Flight' : 'Standard View'} activated`, 'info');
@@ -452,7 +452,7 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         }
         grid.appendChild(clone);
         countLabel.innerText = "No flights found.";
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         return;
     }
 
@@ -525,11 +525,11 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         `;
         grid.appendChild(card);
     });
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     renderRecentSearches();
 
     // Set initial mode status text
@@ -537,7 +537,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const themeIcon = document.getElementById('theme-icon-nav');
     if (themeIcon) {
         themeIcon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     const revealElements = document.querySelectorAll('.reveal-text');
