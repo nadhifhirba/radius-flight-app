@@ -2,11 +2,12 @@
 // Aviasales uses ?marker= directly (TP's own product, no p= needed)
 // Other TP programs: find p= at TP Dashboard → Programs → program → Get Link → p=XXXX in URL
 const TP = {
-    marker: '512833',
+    marker: '714578',
     programs: {
-        traveloka: null,   // Indonesian flights — fill in p= when approved
-        klook: null,       // Activities — fill in p= when approved
-        tripcom: null,     // Hotels + flights — fill in p= when approved
+        aviasales: 4114,   // ✅ confirmed
+        traveloka: null,   // fill in p= when approved
+        klook: null,       // fill in p= when approved
+        tripcom: null,     // fill in p= when approved
     }
 };
 
