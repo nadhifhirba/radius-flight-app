@@ -5,9 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radius | Discover where your budget can take you</title>
-    <meta name="description"
-        content="Radius helps you find the best flights within your budget. Explore destinations by continent or worldwide and discover amazing deals.">
-    <meta name="keywords" content="flights, travel, budget travel, flight discovery, Radius travel app">
+    <meta name="description" content="Temukan ke mana budgetmu bisa membawamu. Radius mencari semua penerbangan murah dari Jakarta, Surabaya, dan kota lain berdasarkan budget — bukan destinasi. Harga real-time Google Flights.">
+    <meta name="keywords" content="penerbangan murah, tiket pesawat murah, flight budget tracker, cari penerbangan berdasarkan budget, Jakarta ke Bali murah, Jakarta ke Singapura murah, budget flight Indonesia">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
@@ -24,6 +23,8 @@
     <meta property="twitter:description"
         content="Discover where your budget can take you. Simple, beautiful flight exploration.">
 
+    <link rel="canonical" href="https://radius-flight-app.vercel.app/">
+
     <!-- Favicon (SVG) -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
@@ -36,7 +37,23 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
 
     <!-- SEO & Social Sharing -->
-
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Radius — Budget Flight Discovery",
+  "description": "Temukan ke mana budgetmu bisa membawamu. Cari penerbangan murah berdasarkan budget.",
+  "url": "https://radius-flight-app.vercel.app",
+  "applicationCategory": "TravelApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "IDR"
+  },
+  "inLanguage": "id-ID"
+}
+</script>
 
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -215,6 +232,21 @@
         </div>
     </header>
 
+    <!-- Price Alert Modal -->
+    <div id="alert-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl">
+            <h3 class="text-xl font-semibold tracking-tight mb-2">Aktifkan Price Alert</h3>
+            <p class="text-slate-500 text-sm mb-6">Kami kabarin kamu kalau ada deal sesuai budget kamu.</p>
+            <input id="alert-email" type="email" placeholder="email@kamu.com"
+                class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm mb-4 bg-transparent focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <button id="alert-submit-btn" onclick="submitPriceAlert()"
+                class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-full py-3 text-sm font-medium hover:bg-sky-500 dark:hover:bg-sky-500 dark:hover:text-white transition-colors mb-3">
+                Aktifkan Alert
+            </button>
+            <button onclick="closeAlertModal()" class="w-full text-slate-400 text-sm hover:text-slate-600 transition-colors">Batal</button>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toast-container"
         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
@@ -359,7 +391,13 @@
         </div>
     </footer>
 
+    <!-- Supabase Auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="/api/config.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
     <script src="app.js"></script>
+    <script src="js/search-sync.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

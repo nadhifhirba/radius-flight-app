@@ -73,9 +73,45 @@ const showToast = (message, type = 'success') => {
 };
 
 function togglePriceAlert() {
+    document.getElementById('alert-modal').classList.remove('hidden');
+}
+
+function closeAlertModal() {
+    document.getElementById('alert-modal').classList.add('hidden');
+}
+
+async function submitPriceAlert() {
+    const email = document.getElementById('alert-email').value.trim();
     const origin = document.getElementById('origin').value;
     const budget = document.getElementById('budget').value;
-    showToast(`Alert set for flights from ${origin} under ${formatCurrency(budget)}`, 'info');
+
+    if (!email || !email.includes('@')) {
+        showToast('Masukkan email yang valid', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('alert-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+
+    try {
+        const res = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, origin, maxPrice: budget })
+        });
+        if (res.ok) {
+            showToast('Price alert aktif! Cek email kamu ✈️', 'success');
+            closeAlertModal();
+        } else {
+            showToast('Gagal menyimpan, coba lagi', 'error');
+        }
+    } catch {
+        showToast('Gagal menyimpan, coba lagi', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Aktifkan Alert';
+    }
 }
 
 // --- Dark Mode ---
