@@ -1,3 +1,21 @@
+// --- Travelpayouts Affiliate Config ---
+// Add p= program IDs here when TP approves each program.
+// Find them: TP Dashboard → Programs → click program → Get Link → p=XXXX in URL
+const TP = {
+    marker: '512833',
+    programs: {
+        aviasales: null,   // TP's own flight search — instant approval, fill in p= when approved
+        traveloka: null,   // Indonesian flights — fill in p= when approved
+        klook: null,       // Activities — fill in p= when approved
+        tripcom: null,     // Hotels + flights — fill in p= when approved
+    }
+};
+
+function buildTPLink(destUrl, programId) {
+    if (!programId) return destUrl;
+    return `https://tp.media/r?marker=${TP.marker}&p=${programId}&u=${encodeURIComponent(destUrl)}`;
+}
+
 // --- 1. Data & Config ---
 const MOCK_DATA = [
     { id: 101, city: "Bali", airport: "DPS", country: "Indonesia", img: "images/bali.jpg", price_one: 850000, price_round: 1600000, airline: "Super Air Jet", stops: 0, coords: [-8.748, 115.167], cheapestMonth: "March", cheapestPrice: 1400000, hotelPrice: 500000, historicalAvg: 1800000 },
@@ -444,15 +462,18 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         const predictionClass = prediction === "Buy Now" ? "prediction-buy" : "prediction-wait";
 
         const dateStr = f.departureDate ? `on ${f.departureDate}` : '';
-        // Indonesian destinations use Traveloka, international use Kiwi.com
         const INDONESIAN_AIRPORTS = ['DPS', 'SUB', 'KNO', 'LBJ', 'LOP', 'JOG', 'BPN', 'PLM', 'MDC', 'UPG', 'YIA'];
         const isIndonesian = INDONESIAN_AIRPORTS.includes(f.airport);
         const safeOrigin = /^[A-Z]{3}$/.test(originCode) ? originCode : 'CGK';
         const safeAirport = /^[A-Z]{3}$/.test(f.airport) ? f.airport : '';
         const safeDate = f.departureDate ? f.departureDate.replace(/[^0-9-]/g, '') : dateStr;
-        const deepLink = isIndonesian
+        // TP-tracked links — buildTPLink falls back to direct URL if program not yet approved
+        const rawLink = isIndonesian
             ? `https://www.traveloka.com/en-id/flight/${safeOrigin}/to/${safeAirport}/${safeDate}/1/ECONOMY`
-            : `https://www.kiwi.com/en/search/results/${safeOrigin}/${safeAirport}/${safeDate}/no-return?currency=IDR&adults=1&ref=nhadesign`;
+            : `https://www.aviasales.com/search/${safeOrigin}${safeDate.replace(/-/g, '').slice(4)}${safeAirport}1`;
+        const deepLink = isIndonesian
+            ? buildTPLink(rawLink, TP.programs.traveloka)
+            : buildTPLink(rawLink, TP.programs.aviasales);
 
         const card = document.createElement('div');
         card.className = "group flight-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 opacity-0 translate-y-8 flex flex-col";
