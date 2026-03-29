@@ -6,7 +6,7 @@ const TP = {
     programs: {
         aviasales: 4114,   // ✅ confirmed
         traveloka: null,   // fill in p= when approved
-        klook: null,       // fill in p= when approved
+        klook: 4110,       // ✅ confirmed
         tripcom: null,     // fill in p= when approved
     }
 };
