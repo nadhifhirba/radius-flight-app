@@ -377,14 +377,19 @@ async function handleSearch(skipGridAnimation = false) {
                     departureDate: flight.departureDate
                 };
             });
-            isLive = true;
-            showToast("Connected to live flight data!", "success");
+            if (results.length > 0) {
+                isLive = true;
+                showToast("Connected to live flight data!", "success");
+            } else {
+                showToast("No flights found for this route. Showing sample destinations.", "info");
+                results = MOCK_DATA;
+            }
         } else {
             throw new Error("Server not reachable");
         }
     } catch (err) {
         void err;
-        showToast("Live/Local Server unavailable. Using Mock Data.", "info");
+        showToast("Live data unavailable. Showing sample destinations.", "info");
         results = MOCK_DATA;
     }
 
