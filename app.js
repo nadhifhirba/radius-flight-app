@@ -2,7 +2,8 @@
 // Aviasales uses ?marker= directly (TP's own product, no p= needed)
 // Other TP programs: find p= at TP Dashboard → Programs → program → Get Link → p=XXXX in URL
 const TP = {
-    marker: '714578',
+    marker: '714578',  // account marker — who gets paid
+    project: '512833', // project ID — tracks clicks from Radiusfly specifically
     programs: {
         aviasales: 4114,   // ✅ confirmed
         traveloka: null,   // fill in p= when approved
@@ -13,14 +14,14 @@ const TP = {
 
 function buildTPLink(destUrl, programId) {
     if (!programId) return destUrl;
-    return `https://tp.media/r?marker=${TP.marker}&p=${programId}&u=${encodeURIComponent(destUrl)}`;
+    return `https://tp.media/r?marker=${TP.marker}&trs=${TP.project}&p=${programId}&u=${encodeURIComponent(destUrl)}`;
 }
 
 function buildAviasalesLink(origin, dest, date) {
     // Aviasales format: /search/ORIGMMDDDES1?marker=MARKER
     const mmdd = date && date.length === 10 ? date.slice(5).replace('-', '') : '';
     const path = mmdd ? `${origin}${mmdd}${dest}1` : `${origin}${dest}`;
-    return `https://www.aviasales.com/search/${path}?marker=${TP.marker}`;
+    return `https://www.aviasales.com/search/${path}?marker=${TP.marker}&trs=${TP.project}`;
 }
 
 // --- 1. Data & Config ---
