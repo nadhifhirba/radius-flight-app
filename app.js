@@ -159,8 +159,8 @@ function renderRecentSearches() {
 
     container.classList.remove('hidden');
     list.innerHTML = history.map(h => `
-        <div class="search-chip" onclick="applyHistorySearch('${h.origin}', '${h.budget}', '${h.tripType}', '${h.geoScope}', '${h.datePref}')">
-            ${h.origin} → ${h.geoScope === 'domestic' ? 'Indonesia' : 'World'} (Rp ${parseInt(h.budget).toLocaleString()})
+        <div class="search-chip" onclick="applyHistorySearch(${JSON.stringify(h.origin)}, ${JSON.stringify(String(h.budget))}, ${JSON.stringify(h.tripType)}, ${JSON.stringify(h.geoScope)}, ${JSON.stringify(h.datePref)})">
+            ${sanitize(h.origin)} \u2192 ${h.geoScope === 'domestic' ? 'Indonesia' : 'World'} (Rp ${parseInt(h.budget).toLocaleString()})
         </div>
     `).join('');
 }
@@ -341,7 +341,7 @@ async function handleSearch(skipGridAnimation = false) {
                 };
             });
             isLive = true;
-            showToast("Connected to Amadeus Live Data!", "success");
+            showToast("Connected to live flight data!", "success");
         } else {
             throw new Error("Server not reachable");
         }
@@ -435,9 +435,12 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         // Indonesian destinations use Traveloka, international use Kiwi.com
         const INDONESIAN_AIRPORTS = ['DPS', 'SUB', 'KNO', 'LBJ', 'LOP', 'JOG', 'BPN', 'PLM', 'MDC', 'UPG', 'YIA'];
         const isIndonesian = INDONESIAN_AIRPORTS.includes(f.airport);
+        const safeOrigin = /^[A-Z]{3}$/.test(originCode) ? originCode : 'CGK';
+        const safeAirport = /^[A-Z]{3}$/.test(f.airport) ? f.airport : '';
+        const safeDate = f.departureDate ? f.departureDate.replace(/[^0-9-]/g, '') : dateStr;
         const deepLink = isIndonesian
-            ? `https://www.traveloka.com/en-id/flight/${originCode}/to/${f.airport}/${f.departureDate || dateStr}/1/ECONOMY`
-            : `https://www.kiwi.com/en/search/results/${originCode}/${f.airport}/${f.departureDate || dateStr}/no-return?currency=IDR&adults=1&ref=nhadesign`;
+            ? `https://www.traveloka.com/en-id/flight/${safeOrigin}/to/${safeAirport}/${safeDate}/1/ECONOMY`
+            : `https://www.kiwi.com/en/search/results/${safeOrigin}/${safeAirport}/${safeDate}/no-return?currency=IDR&adults=1&ref=nhadesign`;
 
         const card = document.createElement('div');
         card.className = "group flight-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 opacity-0 translate-y-8 flex flex-col";

@@ -10,7 +10,7 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://radius-discovery.netlify.app/">
+    <meta property="og:url" content="https://radius-flight-app.vercel.app/">
     <meta property="og:title" content="Radius | Budget Flight Discovery">
     <meta property="og:description"
         content="Discover where your budget can take you. Simple, beautiful flight exploration.">
@@ -24,6 +24,16 @@
         content="Discover where your budget can take you. Simple, beautiful flight exploration.">
 
     <link rel="canonical" href="https://radius-flight-app.vercel.app/">
+
+    <!-- Travelpayouts publisher verification -->
+    <script>
+      (function () {
+          var script = document.createElement("script");
+          script.async = 1;
+          script.src = 'https://emrld.ltd/NTEyODMz.js?t=512833';
+          document.head.appendChild(script);
+      })();
+    </script>
 
     <!-- Favicon (SVG) -->
     <link rel="icon"
@@ -56,14 +66,11 @@
 </script>
 
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="tailwind.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -160,7 +167,7 @@
             <div class="text-3xl md:text-5xl lg:text-6xl font-light leading-snug tracking-tight text-slate-900">
                 <p class="reveal-text inline">I am flying from</p>
                 <div class="reveal-text inline-block relative">
-                    <select id="origin" class="mad-lib-select font-normal">
+                    <select id="origin" class="mad-lib-select font-normal" aria-label="Origin city">
                         <option value="Jakarta">Jakarta (All)</option>
                         <option value="Bali">Bali (DPS)</option>
                         <option value="Surabaya">Surabaya (SUB)</option>
@@ -168,7 +175,7 @@
                 </div>
                 <p class="reveal-text inline">with</p>
                 <div class="reveal-text inline-block relative">
-                    <select id="budget" class="mad-lib-select font-normal">
+                    <select id="budget" class="mad-lib-select font-normal" aria-label="Budget amount">
                         <option value="1000000">Rp 1.000.000</option>
                         <option value="2000000" selected="">Rp 2.000.000</option>
                         <option value="3000000">Rp 3.000.000</option>
@@ -178,21 +185,21 @@
                 </div>
                 <p class="reveal-text inline">for a</p>
                 <div class="reveal-text inline-block relative">
-                    <select id="tripType" class="mad-lib-select font-normal">
+                    <select id="tripType" class="mad-lib-select font-normal" aria-label="Trip type">
                         <option value="round" selected="">Round Trip</option>
                         <option value="one">One Way</option>
                     </select>
                 </div>
                 <p class="reveal-text inline">trip within</p>
                 <div class="reveal-text inline-block relative">
-                    <select id="geoScope" class="mad-lib-select font-normal">
+                    <select id="geoScope" class="mad-lib-select font-normal" aria-label="Geographic scope">
                         <option value="anywhere" selected="">the World</option>
                         <option value="domestic">Indonesia</option>
                     </select>
                 </div>
                 <p class="reveal-text inline">during</p>
                 <div class="reveal-text inline-block relative">
-                    <select id="datePref" class="mad-lib-select font-normal">
+                    <select id="datePref" class="mad-lib-select font-normal" aria-label="Travel date preference">
                         <option value="any" selected="">Any Weekend</option>
                         <option value="january">January</option>
                         <option value="february">February</option>
@@ -252,7 +259,7 @@
         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- Results Section -->
-    <section id="results-section" class="px-6 md:px-12 pb-32 max-w-[1800px] mx-auto min-h-[50vh]">
+    <main id="results-section" class="px-6 md:px-12 pb-32 max-w-[1800px] mx-auto min-h-[50vh]">
         <div class="flex justify-between items-end mb-12 border-b border-slate-200 pb-4">
             <span id="result-count" class="text-lg md:text-xl text-slate-500 font-light reveal-text">
                 Ready for takeoff?
@@ -307,7 +314,7 @@
                 Adjust your budget above to reveal destinations.
             </div>
         </div>
-    </section>
+    </main>
 
     <!-- Zero State Template (Hidden) -->
     <template id="zero-state-template">
@@ -377,20 +384,24 @@
         <div
             class="flex flex-col md:flex-row justify-between items-end text-sm text-slate-500 mb-6 max-w-[1800px] mx-auto">
             <div class="mb-4 md:mb-0">
-                <p>Powered by Amadeus API.</p>
+                <p>Powered by Google Flights.</p>
             </div>
             <div class="flex gap-8">
-                <span>©2024 Radius Inc.</span>
+                <span>©2026 Radius Inc.</span>
                 <span class="opacity-40">by NHADesign</span>
             </div>
         </div>
-        <div class="w-full flex justify-center items-end opacity-20">
-            <h1 class="text-[20vw] leading-[0.7] tracking-tighter font-semibold select-none">
+        <div class="w-full flex justify-center items-end opacity-20" aria-hidden="true">
+            <p class="text-[20vw] leading-[0.7] tracking-tighter font-semibold select-none">
                 radius.
-            </h1>
+            </p>
         </div>
     </footer>
 
+    <!-- Third-party scripts (moved from head to avoid render-blocking) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Supabase Auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="/api/config.js"></script>
