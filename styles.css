@@ -256,6 +256,18 @@ body.dark .theme-toggle {
     }
 }
 
+@keyframes flyAcross {
+    0%   { transform: translateX(-8px) rotate(-5deg); }
+    50%  { transform: translateX(8px) rotate(5deg); }
+    100% { transform: translateX(-8px) rotate(-5deg); }
+}
+
+.loading-plane {
+    display: inline-block;
+    animation: flyAcross 1.8s ease-in-out infinite;
+    filter: grayscale(0.3);
+}
+
 /* Leaflet Customization */
 .leaflet-popup-content-wrapper {
     border-radius: 12px;

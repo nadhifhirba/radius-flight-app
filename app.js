@@ -340,11 +340,58 @@ async function handleSearch(skipGridAnimation = false) {
     if (!skipGridAnimation) document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
 
     // Show Loading
+    let loadingInterval = null;
     if (currentView === 'list' && !skipGridAnimation) {
-        grid.innerHTML = '';
-        for (let i = 0; i < 3; i++) {
-            grid.innerHTML += `<div class="h-[400px] w-full rounded-2xl skeleton"></div>`;
-        }
+        const LOADING_LINES = [
+            "Scanning routes across 21 destinations…",
+            "Asking Google Flights very nicely…",
+            "Calculating how far your budget flies…",
+            "Bribing airlines for better deals…",
+            "Checking if you can afford business class (you can't)…",
+            "Sorting through thousands of fares…",
+            "Finding the cheapest seat that isn't the middle one…",
+            "Almost there — airlines are slow repliers…",
+        ];
+        let msgIdx = 0;
+
+        const wrapper = document.createElement('div');
+        wrapper.id = 'loading-state';
+        wrapper.className = 'col-span-full flex flex-col items-center justify-center py-24 gap-6';
+
+        const plane = document.createElement('div');
+        plane.className = 'text-6xl loading-plane';
+        plane.setAttribute('aria-hidden', 'true');
+        plane.textContent = '✈';
+
+        const dots = document.createElement('div');
+        dots.className = 'flex gap-1.5';
+        [0, 0.15, 0.3].forEach(delay => {
+            const dot = document.createElement('span');
+            dot.className = 'w-2 h-2 rounded-full bg-slate-400 animate-bounce';
+            dot.style.animationDelay = `${delay}s`;
+            dots.appendChild(dot);
+        });
+
+        const msg = document.createElement('p');
+        msg.id = 'loading-msg';
+        msg.className = 'text-slate-500 text-sm font-medium text-center max-w-xs transition-opacity duration-500';
+        msg.textContent = LOADING_LINES[0];
+
+        wrapper.appendChild(plane);
+        wrapper.appendChild(dots);
+        wrapper.appendChild(msg);
+
+        grid.textContent = '';
+        grid.appendChild(wrapper);
+
+        loadingInterval = setInterval(() => {
+            msgIdx = (msgIdx + 1) % LOADING_LINES.length;
+            const el = document.getElementById('loading-msg');
+            if (el) {
+                el.style.opacity = '0';
+                setTimeout(() => { if (el) { el.textContent = LOADING_LINES[msgIdx]; el.style.opacity = '1'; } }, 250);
+            }
+        }, 2500);
     }
 
     // --- FETCH DATA ---
@@ -390,7 +437,7 @@ async function handleSearch(skipGridAnimation = false) {
                 isLive = true;
                 showToast("Connected to live flight data!", "success");
             } else {
-                showToast("No flights found for this route. Showing sample destinations.", "info");
+                showToast("No flights found within that budget. Showing sample destinations.", "info");
                 results = MOCK_DATA;
             }
         } else {
@@ -401,6 +448,8 @@ async function handleSearch(skipGridAnimation = false) {
         showToast("Live data unavailable. Showing sample destinations.", "info");
         results = MOCK_DATA;
     }
+
+    if (loadingInterval) clearInterval(loadingInterval);
 
     const filtered = results.filter(f => {
         const cost = tripType === 'round' ? f.price_round : f.price_one;

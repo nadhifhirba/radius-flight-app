@@ -3,9 +3,49 @@ from urllib.parse import urlparse, parse_qs
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 import json
+import os
+import urllib.request
 
 from fli.models import Airport, FlightSearchFilters, FlightSegment, MaxStops, PassengerInfo, SeatType, SortBy
 from fli.search import SearchFlights
+
+UPSTASH_URL = os.environ.get("UPSTASH_REDIS_REST_URL")
+UPSTASH_TOKEN = os.environ.get("UPSTASH_REDIS_REST_TOKEN")
+
+
+def cache_get(key):
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        return None
+    try:
+        req = urllib.request.Request(
+            f"{UPSTASH_URL}/get/{key}",
+            headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"},
+        )
+        with urllib.request.urlopen(req, timeout=2) as r:
+            data = json.loads(r.read())
+            return json.loads(data["result"]) if data.get("result") else None
+    except Exception:
+        return None
+
+
+def cache_set(key, value, ttl=3600):
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        return
+    try:
+        body = json.dumps(["SET", key, json.dumps(value), "EX", ttl]).encode()
+        req = urllib.request.Request(
+            f"{UPSTASH_URL}/pipeline",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {UPSTASH_TOKEN}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=2)
+    except Exception:
+        pass
+
 
 DESTINATIONS = [
     "DPS", "SUB", "KNO", "LBJ", "LOP", "JOG", "BPN", "PLM", "MDC", "UPG",
@@ -68,6 +108,12 @@ class handler(BaseHTTPRequestHandler):
             return
 
         travel_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+        cache_key = f"radius:{origin.upper()}:{max_price_idr}:{travel_date}"
+
+        cached = cache_get(cache_key)
+        if cached is not None:
+            self._respond(200, cached)
+            return
 
         results = []
         with ThreadPoolExecutor(max_workers=8) as executor:
@@ -90,6 +136,7 @@ class handler(BaseHTTPRequestHandler):
                     })
 
         results.sort(key=lambda x: int(x["price"]["total"]))
+        cache_set(cache_key, results)
         self._respond(200, results)
 
     def do_OPTIONS(self):
