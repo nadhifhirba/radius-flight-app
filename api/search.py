@@ -108,6 +108,15 @@ class handler(BaseHTTPRequestHandler):
             return
 
         travel_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+        date_pref = params.get("datePref", ["flexible"])[0]
+        if date_pref and date_pref != "flexible":
+            month_map = {"january":1,"february":2,"march":3,"april":4,"may":5,"june":6,
+                         "july":7,"august":8,"september":9,"october":10,"november":11,"december":12}
+            if date_pref in month_map:
+                target_month = month_map[date_pref]
+                now = datetime.now()
+                year = now.year if target_month >= now.month else now.year + 1
+                travel_date = datetime(year, target_month, 15).strftime("%Y-%m-%d")
         cache_key = f"radius:{origin.upper()}:{max_price_idr}:{travel_date}"
 
         cached = cache_get(cache_key)
