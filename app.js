@@ -67,7 +67,9 @@ const AIRPORT_DB = {
     "LHR": { city: "London", country: "UK", img: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=800", coords: [51.470, -0.454] },
     "JFK": { city: "New York", country: "USA", img: "https://images.unsplash.com/photo-1496442226666-8d4a0e62e6e9?q=80&w=800", coords: [40.641, -73.778] },
     "CDG": { city: "Paris", country: "France", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800", coords: [49.009, 2.556] },
-    "AMS": { city: "Amsterdam", country: "Netherlands", img: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?q=80&w=800", coords: [52.310, 4.768] }
+    "AMS": { city: "Amsterdam", country: "Netherlands", img: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?q=80&w=800", coords: [52.310, 4.768] },
+    "JHB": { city: "Johor Bahru", country: "Malaysia", img: "https://images.unsplash.com/photo-1559635071-f938c82eb4db?q=80&w=800", coords: [1.636, 103.666] },
+    "BWX": { city: "Banyuwangi", country: "Indonesia", img: "https://images.unsplash.com/photo-1543887019-c0ae985e51c8?q=80&w=800", coords: [-8.307, 114.3] }
 };
 
 // --- Advanced Features State ---
@@ -329,7 +331,11 @@ async function handleSearch(skipGridAnimation = false) {
     const geoScope = document.getElementById('geoScope').value;
     const originSelect = document.getElementById('origin');
     // Amadeus needs 3 letter code
-    const originCode = originSelect.value === 'Jakarta' ? 'CGK' : (originSelect.value === 'Bali' ? 'DPS' : 'SUB');
+    const ORIGIN_MAP = {
+        'Jakarta': 'CGK', 'Bali': 'DPS', 'Surabaya': 'SUB',
+        'Yogyakarta': 'YIA', 'Medan': 'KNO', 'Makassar': 'UPG'
+    };
+    const originCode = ORIGIN_MAP[originSelect.value] || 'CGK';
 
     // UI Elements
     const grid = document.getElementById('results-grid');
