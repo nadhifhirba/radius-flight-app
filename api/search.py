@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
 from datetime import datetime, timedelta
 import json
 import os
@@ -152,32 +152,32 @@ class handler(BaseHTTPRequestHandler):
                 for dest in DESTINATIONS
                 if dest != origin_code
             }
-            for future in as_completed(futures):
-                try:
-                    result = future.result(timeout=8)
-                except Exception:
-                    continue
-                if result is None:
-                    continue
-                raw_price = result["price"]
-                # fli returns prices in different units across versions:
-                # - Older versions return compressed values (e.g. 53 = ~$53 USD)
-                # - Newer versions return raw IDR (e.g. 916,369)
-                # Detect and normalize: anything < 100,000 needs conversion
-                # Skip zero/null prices (invalid results)
-                if not raw_price or raw_price <= 0:
-                    continue
-                if raw_price < 100_000:
-                    price_idr = int(raw_price * 16_200)
-                else:
-                    price_idr = int(raw_price)
-                if price_idr <= max_price_idr:
-                    results.append({
-                        "destination": result["destination"],
-                        "price": {"total": str(price_idr)},
-                        "departureDate": travel_date,
-                        "airline": result["airline"],
-                    })
+            # Process with global timeout: wait up to 25s total
+            deadline = datetime.now().timestamp() + 25
+            pending = set(futures.keys())
+            while pending and datetime.now().timestamp() < deadline:
+                done, pending = wait(pending, timeout=3, return_when=FIRST_COMPLETED)
+                for future in done:
+                    try:
+                        result = future.result(timeout=1)
+                    except Exception:
+                        continue
+                    if result is None:
+                        continue
+                    raw_price = result["price"]
+                    if not raw_price or raw_price <= 0:
+                        continue
+                    if raw_price < 100_000:
+                        price_idr = int(raw_price * 16_200)
+                    else:
+                        price_idr = int(raw_price)
+                    if price_idr <= max_price_idr:
+                        results.append({
+                            "destination": result["destination"],
+                            "price": {"total": str(price_idr)},
+                            "departureDate": travel_date,
+                            "airline": result["airline"],
+                        })
 
         results.sort(key=lambda x: int(x["price"]["total"]))
         if results:
