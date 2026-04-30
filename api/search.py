@@ -72,14 +72,17 @@ def search_destination(origin_airport, destination_code, travel_date):
         search = SearchFlights()
         flights = search.search(filters)
         if not flights:
+            print(f"DEBUG {destination_code}: no flights found", flush=True)
             return None
         cheapest = flights[0]
+        print(f"DEBUG {destination_code}: {cheapest.price} {cheapest.legs[0].airline.value}", flush=True)
         return {
             "destination": destination_code,
-            "price": cheapest.price,  # raw price (format depends on fli version — normalized later)
+            "price": cheapest.price,
             "airline": cheapest.legs[0].airline.value,
         }
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG {destination_code}: ERROR {type(e).__name__}: {e}", flush=True)
         return None
 
 
