@@ -185,6 +185,9 @@ class handler(BaseHTTPRequestHandler):
                 # - Older versions return compressed values (e.g. 53 = ~$53 USD)
                 # - Newer versions return raw IDR (e.g. 916,369)
                 # Detect and normalize: anything < 100,000 needs conversion
+                # Skip zero/null prices (invalid results)
+                if not raw_price or raw_price <= 0:
+                    continue
                 if raw_price < 100_000:
                     price_idr = int(raw_price * 16_200)
                 else:
