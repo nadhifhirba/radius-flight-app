@@ -117,7 +117,7 @@ class handler(BaseHTTPRequestHandler):
                 now = datetime.now()
                 year = now.year if target_month >= now.month else now.year + 1
                 travel_date = datetime(year, target_month, 15).strftime("%Y-%m-%d")
-        cache_key = f"radius:{origin.upper()}:{max_price_idr}:{travel_date}"
+        cache_key = f"radius:v2:{origin.upper()}:{max_price_idr}:{travel_date}"
 
         cached = cache_get(cache_key)
         if cached is not None:
