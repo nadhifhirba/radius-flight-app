@@ -384,62 +384,16 @@ async function handleSearch(skipGridAnimation = false) {
 
     if (!skipGridAnimation) document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
 
-    // Show Loading
-    let loadingInterval = null;
-    if (currentView === 'list' && !skipGridAnimation) {
-        const LOADING_LINES = [
-            "Scanning routes across 21 destinations…",
-            "Asking Google Flights very nicely…",
-            "Calculating how far your budget flies…",
-            "Bribing airlines for better deals…",
-            "Checking if you can afford business class (you can't)…",
-            "Sorting through thousands of fares…",
-            "Finding the cheapest seat that isn't the middle one…",
-            "Almost there — airlines are slow repliers…",
-        ];
-        let msgIdx = 0;
+    // --- RENDER MOCK DATA INSTANTLY (perceived speed) ---
+    const mockFiltered = MOCK_DATA.filter(f => {
+        const cost = tripType === 'round' ? f.price_round : f.price_one;
+        const matchesBudget = cost <= budget * 1.1;
+        const matchesGeo = geoScope === 'domestic' ? f.country === 'Indonesia' : true;
+        return matchesBudget && matchesGeo;
+    });
+    renderResults(mockFiltered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, false);
 
-        const wrapper = document.createElement('div');
-        wrapper.id = 'loading-state';
-        wrapper.className = 'col-span-full flex flex-col items-center justify-center py-24 gap-6';
-
-        const plane = document.createElement('div');
-        plane.className = 'text-6xl loading-plane';
-        plane.setAttribute('aria-hidden', 'true');
-        plane.textContent = '✈';
-
-        const dots = document.createElement('div');
-        dots.className = 'flex gap-1.5';
-        [0, 0.15, 0.3].forEach(delay => {
-            const dot = document.createElement('span');
-            dot.className = 'w-2 h-2 rounded-full bg-slate-400 animate-bounce';
-            dot.style.animationDelay = `${delay}s`;
-            dots.appendChild(dot);
-        });
-
-        const msg = document.createElement('p');
-        msg.id = 'loading-msg';
-        msg.className = 'text-slate-500 text-sm font-medium text-center max-w-xs transition-opacity duration-500';
-        msg.textContent = LOADING_LINES[0];
-
-        wrapper.appendChild(plane);
-        wrapper.appendChild(dots);
-        wrapper.appendChild(msg);
-
-        grid.textContent = '';
-        grid.appendChild(wrapper);
-
-        loadingInterval = setInterval(() => {
-            msgIdx = (msgIdx + 1) % LOADING_LINES.length;
-            const el = document.getElementById('loading-msg');
-            if (el) {
-                el.style.opacity = '0';
-                setTimeout(() => { if (el) { el.textContent = LOADING_LINES[msgIdx]; el.style.opacity = '1'; } }, 250);
-            }
-        }, 2500);
-    }
-
-    // --- FETCH DATA ---
+    // --- FETCH LIVE DATA IN BACKGROUND ---
     let results = [];
     let isLive = false;
 
@@ -494,19 +448,19 @@ async function handleSearch(skipGridAnimation = false) {
         results = MOCK_DATA;
     }
 
-    if (loadingInterval) clearInterval(loadingInterval);
+    // Re-render with live data if we got it from the API
+    if (isLive && results.length > 0) {
+        const filtered = results.filter(f => {
+            const cost = tripType === 'round' ? f.price_round : f.price_one;
+            const matchesBudget = cost <= budget * 1.1;
+            const matchesGeo = geoScope === 'domestic' ? f.country === 'Indonesia' : true;
+            return matchesBudget && matchesGeo;
+        });
 
-    const filtered = results.filter(f => {
-        const cost = tripType === 'round' ? f.price_round : f.price_one;
-        const matchesBudget = cost <= budget * 1.1;
-        const matchesGeo = geoScope === 'domestic' ? f.country === 'Indonesia' : true;
-        return matchesBudget && matchesGeo;
-    });
+        renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive);
+    }
 
-    // Save Search
     saveSearch({ origin: originSelect.value, budget, tripType, geoScope, datePref: document.getElementById('datePref').value });
-
-    renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive);
 }
 
 function renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive) {
