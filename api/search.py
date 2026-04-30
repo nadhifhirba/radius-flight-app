@@ -72,17 +72,14 @@ def search_destination(origin_airport, destination_code, travel_date):
         search = SearchFlights()
         flights = search.search(filters)
         if not flights:
-            print(f"DEBUG {destination_code}: no flights found", flush=True)
             return None
         cheapest = flights[0]
-        print(f"DEBUG {destination_code}: {cheapest.price} {cheapest.legs[0].airline.value}", flush=True)
         return {
             "destination": destination_code,
             "price": cheapest.price,
             "airline": cheapest.legs[0].airline.value,
         }
-    except Exception as e:
-        print(f"DEBUG {destination_code}: ERROR {type(e).__name__}: {e}", flush=True)
+    except Exception:
         return None
 
 
@@ -123,12 +120,12 @@ class handler(BaseHTTPRequestHandler):
         cache_key = f"radius:v3:{origin.upper()}:{max_price_idr}:{travel_date}"
 
         cached = cache_get(cache_key)
-        if cached is not None:
+        if cached is not None and len(cached) > 0:
             self._respond(200, cached)
             return
 
         results = []
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers=6) as executor:
             futures = {
                 executor.submit(search_destination, origin_airport, dest, travel_date): dest
                 for dest in DESTINATIONS
@@ -155,7 +152,8 @@ class handler(BaseHTTPRequestHandler):
                     })
 
         results.sort(key=lambda x: int(x["price"]["total"]))
-        cache_set(cache_key, results)
+        if results:
+            cache_set(cache_key, results)
         self._respond(200, results)
 
     def do_OPTIONS(self):
