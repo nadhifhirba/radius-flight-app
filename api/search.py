@@ -199,7 +199,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Cache-Control", "public, s-maxage=3600, max-age=600, stale-while-revalidate=86400")
+        self.send_header("Cache-Control", "public, max-age=300, stale-while-revalidate=600")
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
 
