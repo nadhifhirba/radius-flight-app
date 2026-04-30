@@ -6,10 +6,15 @@ const TP = {
     project: '512833', // project ID — tracks clicks from Radiusfly specifically
     programs: {
         aviasales: 4114,   // ✅ confirmed
-        traveloka: null,   // fill in p= when approved
         klook: 4110,       // ✅ confirmed
-        tripcom: null,     // fill in p= when approved
     }
+};
+
+// Direct affiliate IDs (no TP wrapper needed)
+const AFFILIATE = {
+    traveloka: 'NHADESIGN',  // promocode — register at partner.traveloka.com
+    kiwi: 'nhadesign',        // affilid — register at partners.kiwi.com
+    tiket: 'NHADESIGN',       // ref — register at affiliate.tiket.com
 };
 
 function buildTPLink(destUrl, programId) {
@@ -22,6 +27,15 @@ function buildAviasalesLink(origin, dest, date) {
     const mmdd = date && date.length === 10 ? date.slice(5).replace('-', '') : '';
     const path = mmdd ? `${origin}${mmdd}${dest}1` : `${origin}${dest}`;
     return `https://www.aviasales.com/search/${path}?marker=${TP.marker}&trs=${TP.project}`;
+}
+
+function buildTravelokaLink(origin, dest, date) {
+    const safeDate = date ? date.replace(/[^0-9-]/g, '') : '';
+    return `https://www.traveloka.com/en-id/flight/${origin}/to/${dest}/${safeDate}/1/ECONOMY?promocode=${AFFILIATE.traveloka}`;
+}
+
+function buildKiwiLink(origin, dest, date) {
+    return `https://www.kiwi.com/en/search/results/${origin}/${dest}/${date}?affilid=${AFFILIATE.kiwi}`;
 }
 
 // --- 1. Data & Config ---
@@ -568,12 +582,16 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         const isIndonesian = INDONESIAN_AIRPORTS.includes(f.airport);
         const safeOrigin = /^[A-Z]{3}$/.test(originCode) ? originCode : 'CGK';
         const safeAirport = /^[A-Z]{3}$/.test(f.airport) ? f.airport : '';
-        const safeDate = f.departureDate ? f.departureDate.replace(/[^0-9-]/g, '') : dateStr;
-        // TP-tracked links — Aviasales uses ?marker= directly, others use tp.media/r
-        const travelokaRaw = `https://www.traveloka.com/en-id/flight/${safeOrigin}/to/${safeAirport}/${safeDate}/1/ECONOMY`;
-        const deepLink = isIndonesian
-            ? buildTPLink(travelokaRaw, TP.programs.traveloka)
-            : buildAviasalesLink(safeOrigin, safeAirport, f.departureDate);
+        const safeDate = f.departureDate ? f.departureDate.replace(/[^0-9-]/g, '') : '';
+        // Affiliate links
+        const travelokaLink = buildTravelokaLink(safeOrigin, safeAirport, safeDate);
+        const kiwiLink = isIndonesian ? null : buildKiwiLink(safeOrigin, safeAirport, f.departureDate || '');
+        const aviasalesLink = buildAviasalesLink(safeOrigin, safeAirport, f.departureDate);
+        
+        const primaryLink = isIndonesian ? travelokaLink : aviasalesLink;
+        const primaryLabel = isIndonesian ? 'Traveloka' : 'Aviasales';
+        const secondaryLink = isIndonesian ? null : kiwiLink;
+        const secondaryLabel = 'Kiwi.com';
 
         const card = document.createElement('div');
         card.className = "group flight-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 opacity-0 translate-y-8 flex flex-col";
@@ -610,7 +628,8 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
                         <span class="block text-xl font-semibold tracking-tight text-slate-900">${formatCurrency(cost)}</span>
                         <span class="text-xs text-slate-400 font-medium">${sanitize(f.departureDate ? f.departureDate : (tripType === 'one' ? 'One Way' : 'Round Trip'))}</span>
                     </div>
-                    <a href="${deepLink}" target="_blank" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors affiliate-link" data-destination="${f.airport}" data-origin="${originCode}">Book</a>
+                    <a href="${primaryLink}" target="_blank" rel="noopener" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors affiliate-link" data-destination="${f.airport}" data-origin="${originCode}" data-provider="${primaryLabel.toLowerCase()}">${primaryLabel}</a>
+                    ${secondaryLink ? '<a href="' + secondaryLink + '" target="_blank" rel="noopener" class="rounded-full border border-slate-300 px-4 py-2 text-xs font-medium text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors affiliate-link" data-destination="' + f.airport + '" data-origin="' + originCode + '" data-provider="kiwi">' + secondaryLabel + '</a>' : ''}
                 </div>
             </div>
         `;
@@ -673,8 +692,11 @@ document.addEventListener('click', (e) => {
     if (link) {
         const dest = link.dataset.destination;
         const origin = link.dataset.origin;
+        const provider = link.dataset.provider;
         if (typeof gtag !== 'undefined') {
-            gtag('event', 'affiliate_click', { destination: dest, origin: origin });
+            gtag('event', 'affiliate_click', { destination: dest, origin: origin, provider: provider });
         }
+        // Fallback: log to console for debugging
+        console.log('[Radius] affiliate_click', { destination: dest, origin: origin, provider: provider });
     }
 });
