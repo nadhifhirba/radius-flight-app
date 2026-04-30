@@ -1,6 +1,6 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait, FIRST_COMPLETED
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
 from datetime import datetime, timedelta
 import json
 import os
@@ -146,13 +146,13 @@ class handler(BaseHTTPRequestHandler):
 
         results = []
         origin_code = origin_airport.name
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        executor = ThreadPoolExecutor(max_workers=10)
+        try:
             futures = {
                 executor.submit(search_destination, origin_airport, dest, travel_date): dest
                 for dest in DESTINATIONS
                 if dest != origin_code
             }
-            # Process with global timeout: wait up to 25s total
             deadline = datetime.now().timestamp() + 25
             pending = set(futures.keys())
             while pending and datetime.now().timestamp() < deadline:
@@ -178,6 +178,8 @@ class handler(BaseHTTPRequestHandler):
                             "departureDate": travel_date,
                             "airline": result["airline"],
                         })
+        finally:
+            executor.shutdown(wait=False)
 
         results.sort(key=lambda x: int(x["price"]["total"]))
         if results:
