@@ -37,9 +37,13 @@ No framework, no build tool for JS — Tailwind is pre-built via CLI.
 
 `api/search.py` uses the `fli` Python library (`pip install flights`) which reverse-engineers Google Flights.
 - No API key required
-- Searches 21 destinations in parallel (ThreadPoolExecutor, max_workers=8)
-- USD prices converted to IDR at ×16000
+- Searches 21 destinations in parallel (ThreadPoolExecutor, max_workers=6)
+- Adaptive price normalization: prices < 100,000 are Vercel-compressed (×16,200 to IDR), otherwise raw IDR
 - Results sorted cheapest-first
+- Dual-layer caching: Upstash Redis (1h TTL) + Vercel Edge CDN (s-maxage=3600)
+- Cache key: `radius:v3:{origin}:{budget}:{date}` — empty results are NOT cached
+- Vercel edge HIT: ~0.7s, Upstash HIT: ~3s, Cold MISS: ~8s
+- Frontend renders mock data instantly (~50ms), upgrades to live data when API responds
 
 ## Affiliate Links
 
