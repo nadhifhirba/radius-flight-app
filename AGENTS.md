@@ -37,13 +37,16 @@ No framework, no build tool for JS — Tailwind is pre-built via CLI.
 
 `api/search.py` uses the `fli` Python library (`pip install flights`) which reverse-engineers Google Flights.
 - No API key required
-- Searches 21 destinations in parallel (ThreadPoolExecutor, max_workers=6)
+- Searches 253 destinations worldwide in parallel (ThreadPoolExecutor, max_workers=10)
+- Curated list: 70 Indonesian airports + 180+ international hubs across Asia, Oceania, Europe, Americas, Africa
+- Origin airport auto-excluded from search
 - Adaptive price normalization: prices < 100,000 are Vercel-compressed (×16,200 to IDR), otherwise raw IDR
 - Results sorted cheapest-first
 - Dual-layer caching: Upstash Redis (1h TTL) + Vercel Edge CDN (s-maxage=3600)
-- Cache key: `radius:v3:{origin}:{budget}:{date}` — empty results are NOT cached
-- Vercel edge HIT: ~0.7s, Upstash HIT: ~3s, Cold MISS: ~8s
+- Cache key: `radius:v4:{origin}:{budget}:{date}` — empty results are NOT cached
+- Vercel edge HIT: ~0.7s, Upstash HIT: ~3s, Cold MISS: ~15-25s
 - Frontend renders mock data instantly (~50ms), upgrades to live data when API responds
+- Unknown airports gracefully display as "Unknown (CODE)" with fallback image
 
 ## Affiliate Links
 
@@ -64,7 +67,7 @@ No framework, no build tool for JS — Tailwind is pre-built via CLI.
 
 **Rebuild Tailwind CSS:** `npm run build`
 
-**Add a new destination:** Edit `DESTINATIONS` list in `api/search.py` + add mapping in `app.js` `DESTINATION_DB`.
+**Add a new destination:** Edit `DESTINATIONS` list in `api/search.py` + add to `AIRPORT_DB` in `app.js` for city/image/coords.
 
 **Change affiliate link format:** Edit `renderResults()` in `app.js` around line 436.
 

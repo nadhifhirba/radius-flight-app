@@ -48,8 +48,49 @@ def cache_set(key, value, ttl=3600):
 
 
 DESTINATIONS = [
-    "DPS", "SUB", "KNO", "LBJ", "LOP", "JOG", "BPN", "PLM", "MDC", "UPG",
-    "SIN", "KUL", "BKK", "NRT", "ICN", "HKG", "SGN", "MNL", "SYD", "LHR", "JFK",
+    "ACC", "ADD", "ADL", "AKL", "ALA", "AMD",
+    "AMQ", "AMS", "AOR", "ARN", "ATH", "ATL",
+    "AUH", "BAH", "BCN", "BDJ", "BDO", "BEJ",
+    "BER", "BIK", "BKI", "BKK", "BKS", "BLR",
+    "BMU", "BNE", "BOG", "BOM", "BOS", "BPN",
+    "BRU", "BTH", "BUD", "BUW", "BWN", "CAI",
+    "CAN", "CCU", "CDG", "CEB", "CGK", "CHC",
+    "CJU", "CMB", "CMN", "CNS", "CNX", "COK",
+    "CPH", "CPT", "CRK", "CTS", "CTU", "CUN",
+    "CXR", "DAC", "DAD", "DEL", "DEN", "DFW",
+    "DIL", "DJB", "DJJ", "DME", "DMK", "DMM",
+    "DOH", "DPS", "DRW", "DUB", "DVO", "DWC",
+    "DXB", "ENE", "EVN", "EWR", "EZE", "FCO",
+    "FRA", "FUK", "GIG", "GLX", "GMP", "GRU",
+    "GTO", "GVA", "GYD", "HAN", "HDY", "HEL",
+    "HGH", "HKG", "HKT", "HLP", "HND", "HYD",
+    "IAD", "IAH", "ICN", "IKA", "ILO", "IPH",
+    "IST", "ITM", "JED", "JFK", "JHB", "JNB",
+    "JOG", "KAZ", "KBR", "KBV", "KCH", "KDI",
+    "KHH", "KIX", "KJT", "KMG", "KNO", "KOE",
+    "KOJ", "KTG", "KTM", "KUL", "KWI", "LAH",
+    "LAS", "LAX", "LBJ", "LGK", "LGW", "LHR",
+    "LIM", "LIS", "LOP", "LOS", "LPQ", "LUV",
+    "LUW", "MAA", "MAD", "MAN", "MCO", "MCT",
+    "MDC", "MDL", "MED", "MEL", "MEX", "MFM",
+    "MIA", "MKQ", "MKW", "MLE", "MLG", "MNL",
+    "MOF", "MRU", "MUC", "MXP", "NAM", "NAN",
+    "NBO", "NBX", "NGO", "NQZ", "NRE", "NRT",
+    "OOL", "ORD", "ORY", "OSL", "OTI", "PDG",
+    "PEK", "PEN", "PER", "PGK", "PKN", "PKU",
+    "PKX", "PKY", "PLM", "PLW", "PNK", "POM",
+    "PPS", "PQC", "PRG", "PSU", "PUS", "PVG",
+    "RGN", "RMQ", "RTG", "RUH", "SAN", "SAW",
+    "SCL", "SDJ", "SEA", "SEZ", "SFO", "SGN",
+    "SHA", "SHJ", "SIN", "SMQ", "SOC", "SOQ",
+    "SQN", "SRG", "SUB", "SVO", "SWQ", "SXK",
+    "SYD", "SZB", "SZX", "TAS", "TBS", "TFU",
+    "TGG", "THR", "TIM", "TJQ", "TMC", "TPE",
+    "TRK", "TTE", "UPG", "URT", "USM", "UTP",
+    "VCA", "VCE", "VIE", "VTE", "WAW", "WBA",
+    "WGP", "WLG", "WMX", "XMN", "XSP", "YIA",
+    "YUL", "YVR", "YYZ", "ZAM", "ZQN", "ZRH",
+    "ZRI",
 ]
 
 
@@ -117,7 +158,7 @@ class handler(BaseHTTPRequestHandler):
                 now = datetime.now()
                 year = now.year if target_month >= now.month else now.year + 1
                 travel_date = datetime(year, target_month, 15).strftime("%Y-%m-%d")
-        cache_key = f"radius:v3:{origin.upper()}:{max_price_idr}:{travel_date}"
+        cache_key = f"radius:v4:{origin.upper()}:{max_price_idr}:{travel_date}"
 
         cached = cache_get(cache_key)
         if cached is not None and len(cached) > 0:
@@ -125,13 +166,18 @@ class handler(BaseHTTPRequestHandler):
             return
 
         results = []
-        with ThreadPoolExecutor(max_workers=6) as executor:
+        origin_code = origin_airport.name
+        with ThreadPoolExecutor(max_workers=10) as executor:
             futures = {
                 executor.submit(search_destination, origin_airport, dest, travel_date): dest
                 for dest in DESTINATIONS
+                if dest != origin_code
             }
             for future in as_completed(futures):
-                result = future.result()
+                try:
+                    result = future.result(timeout=8)
+                except Exception:
+                    continue
                 if result is None:
                     continue
                 raw_price = result["price"]

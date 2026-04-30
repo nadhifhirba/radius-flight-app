@@ -532,7 +532,7 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         const predictionClass = prediction === "Buy Now" ? "prediction-buy" : "prediction-wait";
 
         const dateStr = f.departureDate ? `on ${f.departureDate}` : '';
-        const INDONESIAN_AIRPORTS = ['DPS', 'SUB', 'KNO', 'LBJ', 'LOP', 'JOG', 'BPN', 'PLM', 'MDC', 'UPG', 'YIA'];
+        const INDONESIAN_AIRPORTS = ['DPS','SUB','KNO','LBJ','LOP','JOG','BPN','PLM','MDC','UPG','YIA','CGK','HLP','BDJ','BDO','BEJ','BIK','BKS','BMU','BTH','BUW','DJB','DJJ','ENE','GLX','GTO','KAZ','KDI','KJT','KOE','KTG','LAH','LUW','MKQ','MKW','MLG','MOF','NAM','NBX','NRE','OTI','PDG','PGK','PKN','PKU','PKY','PLW','PNK','PSU','RTG','SMQ','SOC','SOQ','SQN','SRG','SWQ','SXK','TIM','TJQ','TMC','TRK','TTE','WBA','WGP','WMX','ZRI','AMQ'];
         const isIndonesian = INDONESIAN_AIRPORTS.includes(f.airport);
         const safeOrigin = /^[A-Z]{3}$/.test(originCode) ? originCode : 'CGK';
         const safeAirport = /^[A-Z]{3}$/.test(f.airport) ? f.airport : '';
