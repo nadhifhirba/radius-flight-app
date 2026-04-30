@@ -75,6 +75,8 @@ DESTINATIONS = [
 
 def search_destination(origin_airport, destination_code, travel_date):
     try:
+        import socket
+        socket.setdefaulttimeout(10)
         dest_airport = Airport[destination_code]
         filters = FlightSearchFilters(
             passenger_info=PassengerInfo(adults=1),
