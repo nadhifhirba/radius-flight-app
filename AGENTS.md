@@ -37,8 +37,8 @@ No framework, no build tool for JS — Tailwind is pre-built via CLI.
 
 `api/search.py` uses the `fli` Python library (`pip install flights`) which reverse-engineers Google Flights.
 - No API key required
-- Searches 253 destinations worldwide in parallel (ThreadPoolExecutor, max_workers=10)
-- Curated list: 70 Indonesian airports + 180+ international hubs across Asia, Oceania, Europe, Americas, Africa
+- Searches 127 destinations worldwide in parallel (ThreadPoolExecutor, max_workers=10)
+- Curated list: 70 Indonesian airports + 57 international hubs across Asia, Oceania, Europe, Americas, Africa
 - Origin airport auto-excluded from search
 - Adaptive price normalization: prices < 100,000 are Vercel-compressed (×16,200 to IDR), otherwise raw IDR
 - Results sorted cheapest-first
