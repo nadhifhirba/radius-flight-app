@@ -276,6 +276,20 @@ let map = null;
 let markers = [];
 let currentView = 'list';
 
+function showMapUnavailable() {
+    const mapContainer = document.getElementById('map-container');
+    if (!mapContainer) return;
+    if (map) {
+        try {
+            map.remove();
+        } catch (err) {
+            void err;
+        }
+    }
+    map = null;
+    mapContainer.innerHTML = '<div class="flex h-full w-full items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500">Map unavailable</div>';
+}
+
 function switchView(view) {
     const listBtn = document.getElementById('view-list');
     const mapBtn = document.getElementById('view-map');
@@ -308,7 +322,12 @@ function switchView(view) {
         mapContainer.classList.remove('hidden');
 
         if (!map) {
-            initMap();
+            try {
+                initMap();
+            } catch (err) {
+                void err;
+                showMapUnavailable();
+            }
         } else {
             setTimeout(() => { map.invalidateSize(); }, 200);
         }
@@ -316,12 +335,18 @@ function switchView(view) {
 }
 
 function initMap() {
-    map = L.map('map-container').setView([2.3, 110], 4);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 19
-    }).addTo(map);
+    try {
+        map = L.map('map-container').setView([2.3, 110], 4);
+        const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+        tileLayer.once('tileerror', showMapUnavailable);
+    } catch (err) {
+        void err;
+        showMapUnavailable();
+    }
 }
 
 // --- 3. Search Logic ---
@@ -554,9 +579,11 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         card.className = "group flight-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 opacity-0 translate-y-8 flex flex-col";
         card.style.animation = `fadeUp 0.6s ease forwards ${index * 0.1}s`;
 
+        const safeImg = typeof f.img === 'string' && f.img.startsWith('https://') ? f.img : 'https://images.unsplash.com/photo-1436491865332-7a61a109c0f3?auto=format&fit=crop&w=800&q=80';
+
         card.innerHTML = `
             <div class="relative h-48 overflow-hidden shrink-0 bg-slate-100">
-                <img src="${f.img}"
+                <img src="${safeImg}"
                      alt="${sanitize(f.city)}"
                      width="800" height="192"
                      loading="lazy"

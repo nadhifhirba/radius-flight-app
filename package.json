@@ -2,7 +2,6 @@
     "name": "radius-flight-discovery",
     "version": "1.0.0",
     "description": "Reverse flight search using Amadeus API",
-    "main": "server.js",
     "scripts": {
         "build": "npx tailwindcss -i input.css -o tailwind.css --minify",
         "build:watch": "npx tailwindcss -i input.css -o tailwind.css --watch"

@@ -36,10 +36,10 @@ The website won't have live data yet because Netlify doesn't know your Amadeus k
 3.  Click **Add a variable** -> **Add a single variable**.
 4.  Add these two:
     *   **Key**: `AMADEUS_CLIENT_ID`
-    *   **Value**: `oVAiTStE8oG20JHm4AvTizo0YL15C4KD`
+    *   **Value**: `your_client_id_here`
 5.  Click **Add another variable**:
     *   **Key**: `AMADEUS_CLIENT_SECRET`
-    *   **Value**: `zGStNQSg1IXUmtAw`
+    *   **Value**: `your_client_secret_here`
 6.  Click **Create variable**.
 
 ---
