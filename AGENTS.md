@@ -37,16 +37,17 @@ No framework, no build tool for JS — Tailwind is pre-built via CLI.
 
 `api/search.py` uses the `fli` Python library (`pip install flights`) which reverse-engineers Google Flights.
 - No API key required
-- Searches 127 destinations worldwide in parallel (ThreadPoolExecutor, max_workers=10)
+- Searches 127 destinations worldwide in parallel (ThreadPoolExecutor, max_workers=15)
 - Curated list: 70 Indonesian airports + 57 international hubs across Asia, Oceania, Europe, Americas, Africa
 - Origin airport auto-excluded from search
 - Adaptive price normalization: prices < 100,000 are Vercel-compressed (×16,200 to IDR), otherwise raw IDR
 - Results sorted cheapest-first
-- Dual-layer caching: Upstash Redis (1h TTL) + Vercel Edge CDN (s-maxage=3600)
-- Cache key: `radius:v4:{origin}:{budget}:{date}` — empty results are NOT cached
-- Vercel edge HIT: ~0.7s, Upstash HIT: ~3s, Cold MISS: ~15-25s
+- Dual-layer caching: Upstash Redis (1h TTL) + Vercel Edge CDN (max-age=300 for non-empty results only)
+- Cache key: `radius:v4:{origin}:{budget}:{date}` — empty results get `no-store`, NEVER cached
+- Vercel edge HIT: ~0.3s, Upstash HIT: ~1s, Cold MISS: 15-50s
 - Frontend renders mock data instantly (~50ms), upgrades to live data when API responds
 - Unknown airports gracefully display as "Unknown (CODE)" with fallback image
+- Socket timeout per destination: 7s, overall search deadline: 50s (Vercel maxDuration: 60s)
 
 ## Affiliate Links
 
