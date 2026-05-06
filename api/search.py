@@ -76,7 +76,7 @@ DESTINATIONS = [
 def search_destination(origin_airport, destination_code, travel_date):
     try:
         import socket
-        socket.setdefaulttimeout(10)
+        socket.setdefaulttimeout(7)
         dest_airport = Airport[destination_code]
         filters = FlightSearchFilters(
             passenger_info=PassengerInfo(adults=1),
@@ -148,14 +148,14 @@ class handler(BaseHTTPRequestHandler):
 
         results = []
         origin_code = origin_airport.name
-        executor = ThreadPoolExecutor(max_workers=10)
+        executor = ThreadPoolExecutor(max_workers=15)
         try:
             futures = {
                 executor.submit(search_destination, origin_airport, dest, travel_date): dest
                 for dest in DESTINATIONS
                 if dest != origin_code
             }
-            deadline = datetime.now().timestamp() + 25
+            deadline = datetime.now().timestamp() + 50
             pending = set(futures.keys())
             while pending and datetime.now().timestamp() < deadline:
                 done, pending = wait(pending, timeout=3, return_when=FIRST_COMPLETED)
