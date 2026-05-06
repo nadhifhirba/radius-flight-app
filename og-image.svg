@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <text x="600" y="200" text-anchor="middle" fill="white" font-family="Inter, sans-serif" font-size="64" font-weight="300" letter-spacing="-2">
+    Don't ask where.
+  </text>
+  <text x="600" y="280" text-anchor="middle" fill="#94a3b8" font-family="Inter, sans-serif" font-size="64" font-weight="300" letter-spacing="-2">
+    Ask how much.
+  </text>
+  <circle cx="600" cy="430" r="6" fill="#FF6B00"/>
+  <text x="620" y="440" fill="#FF6B00" font-family="Inter, sans-serif" font-size="28" font-weight="600" letter-spacing="-1">
+    radius.
+  </text>
+  <line x1="200" y1="480" x2="1000" y2="480" stroke="#334155" stroke-width="1"/>
+  <text x="600" y="520" text-anchor="middle" fill="#64748b" font-family="Inter, sans-serif" font-size="20">
+    Discover where your budget can take you
+  </text>
+  <text x="600" y="560" text-anchor="middle" fill="#475569" font-family="Inter, sans-serif" font-size="16">
+    radiusfly.vercel.app
+  </text>
+</svg>

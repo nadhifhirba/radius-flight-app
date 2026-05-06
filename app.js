@@ -582,8 +582,11 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
                         <span class="block text-xl font-semibold tracking-tight text-slate-900">${formatCurrency(cost)}</span>
                         <span class="text-xs text-slate-400 font-medium">${sanitize(f.departureDate ? f.departureDate : (tripType === 'one' ? 'One Way' : 'Round Trip'))}</span>
                     </div>
-                    <a href="${primaryLink}" target="_blank" rel="noopener" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors affiliate-link" data-destination="${f.airport}" data-origin="${originCode}" data-provider="${primaryLabel.toLowerCase()}">${primaryLabel}</a>
-                    ${secondaryLink ? '<a href="' + secondaryLink + '" target="_blank" rel="noopener" class="rounded-full border border-slate-300 px-4 py-2 text-xs font-medium text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors affiliate-link" data-destination="' + f.airport + '" data-origin="' + originCode + '" data-provider="kiwi">' + secondaryLabel + '</a>' : ''}
+                    <a href="${primaryLink}" target="_blank" rel="noopener" class="rounded-full bg-slate-900 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-500 transition-colors affiliate-link" data-destination="${f.airport}" data-origin="${originCode}" data-provider="${primaryLabel.toLowerCase()}" data-price="${cost}">${primaryLabel}</a>
+                    ${secondaryLink ? '<a href="' + secondaryLink + '" target="_blank" rel="noopener" class="rounded-full border border-slate-300 px-4 py-2 text-xs font-medium text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors affiliate-link" data-destination="' + f.airport + '" data-origin="' + originCode + '" data-provider="kiwi" data-price="' + cost + '">' + secondaryLabel + '</a>' : ''}
+                    <button class="share-btn p-2 rounded-full text-slate-400 hover:text-sky-500 hover:bg-sky-50 transition-colors" data-destination="${f.airport}" data-origin="${originCode}" data-price="${cost}" data-city="${sanitize(f.city)}" aria-label="Share this deal" title="Share">
+                        <i data-lucide="share-2" class="w-4 h-4"></i>
+                    </button>
                 </div>
             </div>
         `;
@@ -647,10 +650,59 @@ document.addEventListener('click', (e) => {
         const dest = link.dataset.destination;
         const origin = link.dataset.origin;
         const provider = link.dataset.provider;
+        const price = link.dataset.price || '';
+        
+        // Google Analytics
         if (typeof gtag !== 'undefined') {
-            gtag('event', 'affiliate_click', { destination: dest, origin: origin, provider: provider });
+            gtag('event', 'affiliate_click', { 
+                destination: dest, 
+                origin: origin, 
+                provider: provider,
+                price: price,
+                event_category: 'affiliate',
+                event_label: provider + '_' + origin + '_' + dest
+            });
         }
-        // Fallback: log to console for debugging
-        console.log('[Radius] affiliate_click', { destination: dest, origin: origin, provider: provider });
+        
+        // Vercel Analytics
+        if (typeof window.va !== 'undefined') {
+            window.va('event', 'affiliate_click', {
+                destination: dest,
+                origin: origin,
+                provider: provider,
+                price: price
+            });
+        }
+        
+        // Travelpayouts handled automatically by emrld script
+        console.log('[Radius] affiliate_click', { destination: dest, origin: origin, provider: provider, price: price });
+    }
+    
+    // Share button handler
+    const shareBtn = e.target.closest('.share-btn');
+    if (shareBtn) {
+        e.preventDefault();
+        const dest = shareBtn.dataset.destination;
+        const origin = shareBtn.dataset.origin;
+        const price = shareBtn.dataset.price;
+        const city = shareBtn.dataset.city;
+        const text = `✈️ ${city} (${dest}) from ${origin} — Rp ${parseInt(price).toLocaleString('id-ID')}\n\nCari penerbangan murah berdasarkan budget di Radius →`;
+        const url = `https://radiusfly.vercel.app/?origin=${origin}&budget=${price}`;
+        
+        if (navigator.share) {
+            navigator.share({ title: 'Radius Flight Deal', text: text, url: url }).catch(() => {});
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(`${text} ${url}`).then(() => {
+                showToast('Link copied! Share it anywhere ✈️');
+            }).catch(() => {});
+        }
+        
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'share', { method: 'result_card', destination: dest });
+        }
+        if (typeof window.va !== 'undefined') {
+            window.va('event', 'share', { destination: dest });
+        }
     }
 });
