@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radius-v3';
+const CACHE_NAME = 'radius-v4';
 const ASSETS_TO_PRECACHE = [
     '/',
     '/index.html',
@@ -29,14 +29,19 @@ self.addEventListener('fetch', (event) => {
     if (event.request.url.includes('/api/')) return;
 
     const url = new URL(event.request.url);
+    // Only handle our own origin. Cross-origin images (Unsplash) must load natively:
+    // a fetch() from the worker is bound by CSP connect-src, which blocks them.
+    if (url.origin !== self.location.origin) return;
     const isAsset = /\.(js|css)$/.test(url.pathname);
 
     if (isAsset) {
         // Network-first: always try network, fall back to cache
         event.respondWith(
             fetch(event.request).then((networkResponse) => {
-                const clone = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                if (networkResponse.ok) {
+                    const clone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                }
                 return networkResponse;
             }).catch(() => caches.match(event.request))
         );
@@ -46,7 +51,10 @@ self.addEventListener('fetch', (event) => {
             caches.match(event.request).then((cachedResponse) => {
                 if (cachedResponse) return cachedResponse;
                 return fetch(event.request).then((networkResponse) => {
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
+                    if (networkResponse.ok) {
+                        const copy = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                    }
                     return networkResponse;
                 }).catch(() => {
                     if (event.request.mode === 'navigate') return caches.match('/index.html');
