@@ -76,7 +76,7 @@ DESTINATIONS = [
 def search_destination(origin_airport, destination_code, travel_date):
     try:
         import socket
-        socket.setdefaulttimeout(7)
+        socket.setdefaulttimeout(6)
         dest_airport = Airport[destination_code]
         filters = FlightSearchFilters(
             passenger_info=PassengerInfo(adults=1),
@@ -139,23 +139,23 @@ class handler(BaseHTTPRequestHandler):
                 now = datetime.now()
                 year = now.year if target_month >= now.month else now.year + 1
                 travel_date = datetime(year, target_month, 15).strftime("%Y-%m-%d")
-        cache_key = f"radius:v4:{origin.upper()}:{max_price_idr}:{travel_date}"
+        cache_key = f"radius:v5:{origin.upper()}:{travel_date}"
 
         cached = cache_get(cache_key)
         if cached is not None and len(cached) > 0:
-            self._respond(200, cached)
+            self._respond(200, [r for r in cached if int(r["price"]["total"]) <= max_price_idr])
             return
 
         results = []
         origin_code = origin_airport.name
-        executor = ThreadPoolExecutor(max_workers=15)
+        executor = ThreadPoolExecutor(max_workers=40)
         try:
             futures = {
                 executor.submit(search_destination, origin_airport, dest, travel_date): dest
                 for dest in DESTINATIONS
                 if dest != origin_code
             }
-            deadline = datetime.now().timestamp() + 50
+            deadline = datetime.now().timestamp() + 24
             pending = set(futures.keys())
             while pending and datetime.now().timestamp() < deadline:
                 done, pending = wait(pending, timeout=3, return_when=FIRST_COMPLETED)
@@ -173,7 +173,7 @@ class handler(BaseHTTPRequestHandler):
                         price_idr = int(raw_price * 16_200)
                     else:
                         price_idr = int(raw_price)
-                    if price_idr <= max_price_idr:
+                    if True:
                         results.append({
                             "destination": result["destination"],
                             "price": {"total": str(price_idr)},
@@ -186,7 +186,7 @@ class handler(BaseHTTPRequestHandler):
         results.sort(key=lambda x: int(x["price"]["total"]))
         if results:
             cache_set(cache_key, results)
-        self._respond(200, results)
+        self._respond(200, [r for r in results if int(r["price"]["total"]) <= max_price_idr])
 
     def do_OPTIONS(self):
         self.send_response(200)

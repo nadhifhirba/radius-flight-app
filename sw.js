@@ -1,4 +1,4 @@
-const CACHE_NAME = 'radius-v4';
+const CACHE_NAME = 'radius-v5';
 const ASSETS_TO_PRECACHE = [
     '/',
     '/index.html',

@@ -413,7 +413,14 @@ async function handleSearch(skipGridAnimation = false) {
 
     try {
 
-        const response = await fetch(`/api/search?origin=${originCode}&maxPrice=${budget}&datePref=${document.getElementById('datePref').value}`);
+        const ctrl = new AbortController();
+        const abortTimer = setTimeout(() => ctrl.abort(), 30000);
+        let response;
+        try {
+            response = await fetch(`/api/search?origin=${originCode}&maxPrice=${budget}&datePref=${document.getElementById('datePref').value}`, { signal: ctrl.signal });
+        } finally {
+            clearTimeout(abortTimer);
+        }
         if (response.ok) {
             const apiData = await response.json();
 
