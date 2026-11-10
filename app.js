@@ -546,7 +546,7 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
         else if (ratio > 1.1) { dealLabel = "Standard"; dealClass = "text-orange-500"; barColor = "bg-orange-500"; barWidth = "30%"; }
 
         // Prediction Logic (Mock)
-        const prediction = ratio < 0.9 ? "Buy Now" : "Wait";
+        const prediction = ratio < 0.8 ? "Buy Now" : "Wait"; // same cut-off as Great Value, so badge and label agree
         const predictionClass = prediction === "Buy Now" ? "prediction-buy" : "prediction-wait";
 
         const dateStr = f.departureDate ? `on ${f.departureDate}` : '';
