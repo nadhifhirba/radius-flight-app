@@ -535,7 +535,7 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
     filtered.forEach((f, index) => {
         const cost = tripType === 'round' ? f.price_round : f.price_one;
         // Live results carry no price history, so rank each fare against the median of this search.
-        const ratio = isLive ? cost / medianCost : cost / f.historicalAvg;
+        const ratio = cost / medianCost;
 
         let dealLabel = "Fair Price";
         let dealClass = "text-slate-500";
