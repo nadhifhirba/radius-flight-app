@@ -365,12 +365,12 @@ function switchView(view) {
 function initMap() {
     try {
         map = L.map('map-container').setView([2.3, 110], 4);
-        const tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap &copy; CARTO',
-            subdomains: 'abcd',
+        const tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
             maxZoom: 19
         }).addTo(map);
         tileLayer.once('tileerror', showMapUnavailable);
+        updateMapMarkers();
     } catch (err) {
         void err;
         showMapUnavailable();
@@ -378,7 +378,13 @@ function initMap() {
 }
 
 // --- 3. Search Logic ---
+let searchSeq = 0;
+let searchAbort = null;
 async function handleSearch(skipGridAnimation = false) {
+    const mySeq = ++searchSeq;
+    if (searchAbort) searchAbort.abort();
+    searchAbort = new AbortController();
+    const signal = searchAbort.signal;
     const budget = parseInt(document.getElementById('budget').value);
     const tripType = document.getElementById('tripType').value;
     const geoScope = document.getElementById('geoScope').value;
@@ -413,7 +419,7 @@ async function handleSearch(skipGridAnimation = false) {
 
     try {
 
-        const response = await fetch(`/api/search?origin=${originCode}&maxPrice=${budget}&datePref=${document.getElementById('datePref').value}`);
+        const response = await fetch(`/api/search?origin=${originCode}&maxPrice=${budget}&datePref=${document.getElementById('datePref').value}`, { signal });
         if (response.ok) {
             const apiData = await response.json();
 
@@ -457,10 +463,12 @@ async function handleSearch(skipGridAnimation = false) {
             throw new Error("Server not reachable");
         }
     } catch (err) {
-        void err;
+        if (err && err.name === 'AbortError') return; // superseded by a newer search
         showToast("Live data unavailable. Showing sample destinations.", "info");
         results = MOCK_DATA;
     }
+
+    if (mySeq !== searchSeq) return; // a newer search is in flight; drop this response
 
     // Re-render with live data if we got it from the API
     if (isLive && results.length > 0) {
@@ -477,12 +485,13 @@ async function handleSearch(skipGridAnimation = false) {
     saveSearch({ origin: originSelect.value, budget, tripType, geoScope, datePref: document.getElementById('datePref').value });
 }
 
-function renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive) {
-    activeFilter.classList.remove('hidden');
-    budgetDisplay.innerText = formatCurrency(budget);
+// Draw markers for the latest results. The map is created lazily (first click on
+// "Map"), so this must also run right after initMap(), not only after a search.
+let lastMapState = null;
+function updateMapMarkers() {
+    if (!map || !lastMapState) return;
+    const { filtered, tripType } = lastMapState;
 
-    // --- MAP UPDATE ---
-    if (map) {
         markers.forEach(m => map.removeLayer(m));
         markers = [];
 
@@ -510,7 +519,16 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
             `);
             markers.push(circle);
         });
-    }
+    if (markers.length) map.fitBounds(L.featureGroup(markers).getBounds(), { padding: [40, 40], maxZoom: 6 });
+}
+
+function renderResults(filtered, tripType, originCode, budget, grid, countLabel, activeFilter, budgetDisplay, isLive) {
+    activeFilter.classList.remove('hidden');
+    budgetDisplay.innerText = formatCurrency(budget);
+
+    // --- MAP UPDATE ---
+    lastMapState = { filtered, tripType };
+    updateMapMarkers();
 
     grid.innerHTML = '';
 
@@ -616,6 +634,17 @@ function renderResults(filtered, tripType, originCode, budget, grid, countLabel,
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof lucide !== 'undefined') lucide.createIcons();
     renderRecentSearches();
+
+    // The hero copy says "adjust your budget" - make that true: any mad-lib
+    // change re-runs the search (debounced) instead of requiring a button click.
+    let searchTimer = null;
+    ['origin', 'budget', 'tripType', 'geoScope', 'datePref'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => handleSearch(true), 400);
+        });
+    });
 
     // Set initial mode status text
     const isDark = document.body.classList.contains('dark');
